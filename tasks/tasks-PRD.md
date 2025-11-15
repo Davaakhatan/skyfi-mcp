@@ -68,9 +68,9 @@
 - `src/services/pricingService.ts` - Pricing calculation and feasibility checking ✅
 - `src/services/pricingService.test.ts` - Unit tests for pricing service ✅
 - `src/services/monitoringService.ts` - AOI monitoring and webhook management ✅
-- `src/services/monitoringService.test.ts` - Unit tests for monitoring service
+- `src/services/monitoringService.test.ts` - Unit tests for monitoring service ✅
 - `src/services/notificationService.ts` - Webhook notification delivery ✅
-- `src/services/notificationService.test.ts` - Unit tests for notification service
+- `src/services/notificationService.test.ts` - Unit tests for notification service ✅
 - `src/services/openStreetMapsClient.ts` - OpenStreetMaps API integration ✅
 - `src/services/openStreetMapsClient.test.ts` - Unit tests for OSM client
 
@@ -302,7 +302,7 @@
   - [x] 12.7 Add monitoring activation/deactivation
   - [x] 12.8 Create notification service for webhook delivery
   - [x] 12.9 Implement webhook retry logic and error handling
-  - [ ] 12.10 Write unit tests for monitoring and notification services
+  - [x] 12.10 Write unit tests for monitoring and notification services
   - [ ] 12.11 Create integration tests for webhook delivery
 
 - [ ] 13.0 Cloud Deployment Support
