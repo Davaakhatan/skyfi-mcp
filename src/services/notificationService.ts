@@ -183,11 +183,11 @@ export class NotificationService {
    * Log webhook delivery
    */
   private async logWebhookDelivery(
-    webhookUrl: string,
+    _webhookUrl: string,
     eventType: string,
     payload: unknown,
     status: string,
-    error?: string
+    _error?: string
   ): Promise<void> {
     try {
       // Extract monitoring ID from webhook URL if possible
@@ -197,8 +197,8 @@ export class NotificationService {
          VALUES ($1, $2, $3, $4, $5)`,
         [null, eventType, JSON.stringify(payload), status, 0]
       );
-    } catch (error) {
-      logger.error('Failed to log webhook delivery', { error });
+    } catch (err) {
+      logger.error('Failed to log webhook delivery', { error: err });
       // Don't throw - logging failure shouldn't break webhook delivery
     }
   }
