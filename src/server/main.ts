@@ -9,6 +9,9 @@ import { defaultRateLimiter } from './middleware/rateLimit';
 import apiRoutes from './routes/index';
 import authRoutes from './routes/auth.routes';
 import sseRoutes from './routes/sse.routes';
+import ordersRoutes from './routes/orders.routes';
+import searchRoutes from './routes/search.routes';
+import pricingRoutes from './routes/pricing.routes';
 import { testConnection, closePool } from '@config/database';
 
 const app: Express = express();
@@ -56,6 +59,9 @@ app.get('/health', (req: Request, res: Response) => {
 // API routes
 app.use(`/${config.apiVersion}`, apiRoutes);
 app.use(`/${config.apiVersion}/auth`, authRoutes);
+app.use(`/${config.apiVersion}/orders`, ordersRoutes);
+app.use(`/${config.apiVersion}/search`, searchRoutes);
+app.use(`/${config.apiVersion}/pricing`, pricingRoutes);
 app.use(`/${config.apiVersion}/events`, sseRoutes);
 
 // 404 handler (must be before error handler)
