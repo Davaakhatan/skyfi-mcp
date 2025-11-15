@@ -11,7 +11,7 @@ export class SearchRepository {
   /**
    * Create a new search
    */
-  async create(userId: string, query: unknown, results?: unknown, context?: unknown): Promise<Search> {
+  async create(userId: string, searchQuery: unknown, results?: unknown, context?: unknown): Promise<Search> {
     try {
       const result = await query(
         `INSERT INTO searches (user_id, query, results, context)
@@ -19,7 +19,7 @@ export class SearchRepository {
          RETURNING *`,
         [
           userId,
-          JSON.stringify(query),
+          JSON.stringify(searchQuery),
           results ? JSON.stringify(results) : null,
           context ? JSON.stringify(context) : null,
         ]

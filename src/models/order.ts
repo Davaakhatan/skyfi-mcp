@@ -2,9 +2,19 @@
  * Order data models and types
  */
 
+export interface Polygon {
+  type: 'Polygon';
+  coordinates: number[][][];
+}
+
+export interface MultiPolygon {
+  type: 'MultiPolygon';
+  coordinates: number[][][][];
+}
+
 export interface OrderData {
   dataType?: string;
-  areaOfInterest?: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  areaOfInterest?: Polygon | MultiPolygon;
   timeRange?: {
     start: string;
     end: string;
