@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthenticationError } from '@utils/errors';
 import { logger } from '@utils/logger';
+import { apiKeyService } from '@services/apiKeyService';
 
 /**
  * Extract API key from request headers
@@ -42,17 +43,25 @@ export const authenticate = async (
       throw new AuthenticationError('API key is required');
     }
 
-    // TODO: Validate API key against database
-    // For now, we'll do basic validation
+    // Basic format validation
     if (apiKey.length < 10) {
       throw new AuthenticationError('Invalid API key format');
     }
 
-    // Attach API key to request for use in controllers
+    // Validate API key against database
+    const validation = await apiKeyService.validateApiKey(apiKey);
+    
+    if (!validation) {
+      throw new AuthenticationError('Invalid or expired API key');
+    }
+
+    // Attach user info to request
     (req as any).apiKey = apiKey;
-    (req as any).userId = 'user-id-placeholder'; // TODO: Get from database
+    (req as any).userId = validation.userId;
+    (req as any).apiKeyId = validation.apiKeyId;
 
     logger.debug('Authentication successful', {
+      userId: validation.userId,
       apiKeyPrefix: apiKey.substring(0, 8) + '...',
       path: req.path,
     });
@@ -81,9 +90,14 @@ export const optionalAuth = async (
     const apiKey = extractApiKey(req);
 
     if (apiKey) {
-      // TODO: Validate API key against database
-      (req as any).apiKey = apiKey;
-      (req as any).userId = 'user-id-placeholder'; // TODO: Get from database
+      // Validate API key against database
+      const validation = await apiKeyService.validateApiKey(apiKey);
+      
+      if (validation) {
+        (req as any).apiKey = apiKey;
+        (req as any).userId = validation.userId;
+        (req as any).apiKeyId = validation.apiKeyId;
+      }
     }
 
     next();
