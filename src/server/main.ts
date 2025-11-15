@@ -75,12 +75,25 @@ const startServer = async () => {
       });
     }
 
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
       logger.info(`SkyFi MCP Server started`, {
         port: config.port,
         environment: config.nodeEnv,
         apiVersion: config.apiVersion,
       });
+    });
+
+    // Handle server errors
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${config.port} is already in use`, {
+          port: config.port,
+          hint: 'Another process is using this port. Kill it with: lsof -ti:3000 | xargs kill -9',
+        });
+      } else {
+        logger.error('Server error', { error: error.message });
+      }
+      process.exit(1);
     });
   } catch (error) {
     logger.error('Failed to start server', { error });
