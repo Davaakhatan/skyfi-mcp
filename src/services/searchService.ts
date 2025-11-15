@@ -1,7 +1,7 @@
 import { searchRepository } from '@repositories/searchRepository';
 import { skyfiClient } from './skyfiClient';
 import { Search, SearchQuery, SearchResponse } from '@models/search';
-import { NotFoundError, ValidationError } from '@utils/errors';
+import { ValidationError } from '@utils/errors';
 import { logger } from '@utils/logger';
 
 /**
