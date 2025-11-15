@@ -113,7 +113,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.ACTIVE,
         config: null,
@@ -153,7 +156,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.INACTIVE,
         config: null,
@@ -184,7 +190,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.INACTIVE,
         config: null,
@@ -210,7 +219,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.INACTIVE,
         config: null,
@@ -245,7 +257,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.ACTIVE,
         config: null,
@@ -269,7 +284,10 @@ describe('MonitoringService', () => {
       const mockMonitoring = {
         id: monitoringId,
         userId,
-        aoiData: {},
+        aoiData: {
+          type: 'Polygon',
+          coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+        },
         webhookUrl: null,
         status: MonitoringStatus.ACTIVE,
         config: null,
@@ -282,7 +300,7 @@ describe('MonitoringService', () => {
         status: MonitoringStatus.INACTIVE,
       };
 
-      mockMonitoringRepository.findById.mockResolvedValueOnce(mockMonitoring);
+      mockMonitoringRepository.findById.mockResolvedValueOnce(mockMonitoring as any);
       mockMonitoringRepository.update.mockResolvedValueOnce(deactivatedMonitoring as any);
 
       const result = await monitoringService.deactivateMonitoring(monitoringId, userId);
@@ -319,7 +337,10 @@ describe('MonitoringService', () => {
         {
           id: 'monitoring-1',
           userId,
-          aoiData: {},
+          aoiData: {
+            type: 'Polygon',
+            coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+          },
           webhookUrl: null,
           status: MonitoringStatus.ACTIVE,
           config: null,
@@ -329,7 +350,10 @@ describe('MonitoringService', () => {
         {
           id: 'monitoring-2',
           userId,
-          aoiData: {},
+          aoiData: {
+            type: 'Polygon',
+            coordinates: [[[0, 0], [2, 0], [2, 2], [0, 2], [0, 0]]],
+          },
           webhookUrl: null,
           status: MonitoringStatus.INACTIVE,
           config: null,
