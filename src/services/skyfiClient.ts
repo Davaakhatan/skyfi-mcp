@@ -66,9 +66,14 @@ class SkyFiClient {
 
         // Transform axios errors to our error format
         if (error.response) {
+          const errorMessage = 
+            (error.response.data && typeof error.response.data === 'object' && 'message' in error.response.data)
+              ? (error.response.data as any).message
+              : error.message;
+          
           throw new ExternalServiceError(
             'SkyFi API',
-            error.response.data?.message || error.message,
+            errorMessage,
             {
               status: error.response.status,
               data: error.response.data,
