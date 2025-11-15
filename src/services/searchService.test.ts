@@ -37,8 +37,20 @@ describe('SearchService', () => {
     it('should search data successfully', async () => {
       const mockResults = {
         results: [
-          { id: 'result-1', name: 'Product 1' },
-          { id: 'result-2', name: 'Product 2' },
+          { 
+            id: 'result-1', 
+            dataType: 'satellite',
+            areaOfInterest: mockQuery.aoi,
+            timeRange: { start: '2024-01-01', end: '2024-01-31' },
+            metadata: { name: 'Product 1' },
+          },
+          { 
+            id: 'result-2',
+            dataType: 'satellite',
+            areaOfInterest: mockQuery.aoi,
+            timeRange: { start: '2024-01-01', end: '2024-01-31' },
+            metadata: { name: 'Product 2' },
+          },
         ],
         total: 2,
       };
@@ -49,7 +61,7 @@ describe('SearchService', () => {
         userId,
         query: mockQuery,
         results: mockResults,
-        context: null,
+        context: undefined,
         createdAt: new Date(),
       });
 
