@@ -1,8 +1,7 @@
 import crypto from 'crypto';
 import { query } from '@config/database';
-import { config } from '@config/index';
 import { logger } from '@utils/logger';
-import { NotFoundError, ValidationError, DatabaseError } from '@utils/errors';
+import { NotFoundError, DatabaseError } from '@utils/errors';
 import { ApiKey } from '@models/user';
 
 /**
