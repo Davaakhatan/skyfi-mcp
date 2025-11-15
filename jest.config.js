@@ -23,6 +23,7 @@ module.exports = {
     '^@repositories/(.*)$': '<rootDir>/src/repositories/$1',
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
     '^@auth/(.*)$': '<rootDir>/src/auth/$1',
+    '^@sse/(.*)$': '<rootDir>/src/sse/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 10000,
