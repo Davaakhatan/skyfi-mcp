@@ -65,9 +65,14 @@ app.use(errorHandler);
 // Start server
 const startServer = async () => {
   try {
-    // Test database connection
+    // Test database connection (non-blocking)
     if (config.nodeEnv !== 'test') {
-      await testConnection();
+      testConnection().catch((error) => {
+        logger.warn('Database connection test failed - server will start anyway', {
+          error: error.message,
+          hint: 'Make sure PostgreSQL is running and database exists',
+        });
+      });
     }
 
     app.listen(config.port, () => {

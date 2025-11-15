@@ -49,9 +49,15 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-6. Run database migrations (when available):
+6. Setup database (if using Docker Compose, database is created automatically):
 ```bash
-npm run migrate
+# Option 1: Use the setup script
+npm run db:setup
+
+# Option 2: Manual setup
+# First, ensure PostgreSQL is running, then:
+psql -h localhost -U postgres -c "CREATE DATABASE skyfi_mcp"
+psql -h localhost -U postgres -d skyfi_mcp -f scripts/init-db.sql
 ```
 
 7. Start the development server:
@@ -60,6 +66,8 @@ npm run dev
 ```
 
 The server will be available at `http://localhost:3000`
+
+**Note**: The server will start even if the database connection fails initially. You can set up the database later and the server will connect when it's available.
 
 ## Development
 

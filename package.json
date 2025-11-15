@@ -13,7 +13,9 @@
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"src/**/*.ts\"",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "db:setup": "./scripts/setup-db.sh",
+    "db:init": "psql -h localhost -U postgres -d skyfi_mcp -f scripts/init-db.sql"
   },
   "keywords": [
     "mcp",

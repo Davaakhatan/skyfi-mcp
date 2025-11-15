@@ -80,10 +80,5 @@ pool.on('error', (err) => {
   logger.error('Unexpected database pool error', { error: err });
 });
 
-// Test connection on module load (in development)
-if (config.nodeEnv === 'development') {
-  testConnection().catch((error) => {
-    logger.warn('Initial database connection test failed', { error });
-  });
-}
+// Don't test connection on module load - let the server handle it
 
