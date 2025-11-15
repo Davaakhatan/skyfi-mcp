@@ -283,7 +283,7 @@ describe('MonitoringService', () => {
       };
 
       mockMonitoringRepository.findById.mockResolvedValueOnce(mockMonitoring);
-      mockMonitoringRepository.update.mockResolvedValueOnce(deactivatedMonitoring);
+      mockMonitoringRepository.update.mockResolvedValueOnce(deactivatedMonitoring as any);
 
       const result = await monitoringService.deactivateMonitoring(monitoringId, userId);
 
