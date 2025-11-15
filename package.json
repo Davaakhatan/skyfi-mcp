@@ -15,7 +15,8 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "db:setup": "./scripts/setup-db.sh",
-    "db:init": "psql -h localhost -U postgres -d skyfi_mcp -f scripts/init-db.sql"
+    "db:init": "psql -h localhost -U postgres -d skyfi_mcp -f scripts/init-db.sql",
+    "kill:port": "lsof -ti:3000 | xargs kill -9 || echo 'No process found on port 3000'"
   },
   "keywords": [
     "mcp",
