@@ -8,6 +8,7 @@ import { requestIdMiddleware, errorHandler, notFoundHandler } from './middleware
 import { defaultRateLimiter } from './middleware/rateLimit';
 import apiRoutes from './routes/index';
 import authRoutes from './routes/auth.routes';
+import sseRoutes from './routes/sse.routes';
 import { testConnection, closePool } from '@config/database';
 
 const app: Express = express();
@@ -55,6 +56,7 @@ app.get('/health', (req: Request, res: Response) => {
 // API routes
 app.use(`/${config.apiVersion}`, apiRoutes);
 app.use(`/${config.apiVersion}/auth`, authRoutes);
+app.use(`/${config.apiVersion}/events`, sseRoutes);
 
 // 404 handler (must be before error handler)
 app.use(notFoundHandler);
