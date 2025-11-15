@@ -105,41 +105,42 @@ export class ApiKeyService {
    */
   async validateApiKey(apiKey: string): Promise<{ userId: string; apiKeyId: string } | null> {
     try {
-      // Get all active API keys for the user (we'll verify the hash)
-      // This approach allows us to use timing-safe comparison
+      // Hash the provided API key
+      const keyHash = this.hashApiKey(apiKey);
+
+      // Query for matching hash (indexed lookup is fast)
       const result = await query(
         `SELECT ak.id, ak.user_id, ak.key_hash, ak.expires_at, ak.is_active, u.is_active as user_active
          FROM api_keys ak
          JOIN users u ON ak.user_id = u.id
-         WHERE ak.is_active = true
+         WHERE ak.key_hash = $1
+         AND ak.is_active = true
          AND u.is_active = true
-         AND (ak.expires_at IS NULL OR ak.expires_at > NOW())`,
-        []
+         AND (ak.expires_at IS NULL OR ak.expires_at > NOW())
+         LIMIT 1`,
+        [keyHash]
       );
 
       if (result.rows.length === 0) {
         return null;
       }
 
-      // Compute hash of provided API key
-      const providedHash = this.hashApiKey(apiKey);
+      const row = result.rows[0];
 
-      // Find matching key using timing-safe comparison
-      for (const row of result.rows) {
-        if (this.verifyApiKey(apiKey, row.key_hash)) {
-          // Update last used timestamp (async, don't block)
-          this.updateLastUsed(row.id).catch((error) => {
-            logger.warn('Failed to update API key last used', { error, apiKeyId: row.id });
-          });
-
-          return {
-            userId: row.user_id,
-            apiKeyId: row.id,
-          };
-        }
+      // Verify with timing-safe comparison (defense in depth)
+      if (!this.verifyApiKey(apiKey, row.key_hash)) {
+        return null;
       }
 
-      return null;
+      // Update last used timestamp (async, don't block)
+      this.updateLastUsed(row.id).catch((error) => {
+        logger.warn('Failed to update API key last used', { error, apiKeyId: row.id });
+      });
+
+      return {
+        userId: row.user_id,
+        apiKeyId: row.id,
+      };
     } catch (error) {
       logger.error('Failed to validate API key', { error });
       throw new DatabaseError('Failed to validate API key', { error });
