@@ -124,8 +124,8 @@ describe('SearchService', () => {
         id: searchId,
         userId,
         query: originalQuery,
-        results: null,
-        context: null,
+        results: undefined,
+        context: undefined,
         createdAt: new Date(),
       });
 
