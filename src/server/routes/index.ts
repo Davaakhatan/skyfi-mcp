@@ -20,6 +20,7 @@ router.get('/', (req: Request, res: Response) => {
       search: `/${config.apiVersion}/search`,
       pricing: `/${config.apiVersion}/pricing`,
       monitoring: `/${config.apiVersion}/monitoring`,
+      events: `/${config.apiVersion}/events`,
     },
   });
 });
