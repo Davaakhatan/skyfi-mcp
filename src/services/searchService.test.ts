@@ -110,7 +110,13 @@ describe('SearchService', () => {
 
       const refinedQuery = { ...originalQuery, ...refinements };
       const mockResults = {
-        results: [{ id: 'result-1' }],
+        results: [{
+          id: 'result-1',
+          dataType: 'aerial',
+          areaOfInterest: refinedQuery.aoi!,
+          timeRange: { start: '2024-01-01', end: '2024-01-31' },
+          metadata: {},
+        }],
         total: 1,
       };
 
