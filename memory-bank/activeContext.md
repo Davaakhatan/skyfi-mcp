@@ -55,6 +55,7 @@
 - ✅ Implemented ADK integration (6 tools + executor)
 - ✅ All framework integrations complete and ready for use
 - ✅ Created LangChain demo agent with interactive CLI
+- ✅ Created AI SDK demo agent with Next.js web interface
 - ✅ Added demo documentation and examples
 - ✅ Fixed TypeScript warnings in middleware and routes
 - ✅ Fixed TypeScript module path resolution for @sse
