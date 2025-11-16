@@ -121,11 +121,6 @@
     - ADK integration (pending)
     - LangChain integration (pending)
     - AI SDK integration (pending)
-    - API key service (generation, validation, rotation)
-    - Credential manager (AES-256-GCM encryption)
-    - Database migration for api_keys and credentials tables
-    - Updated auth middleware with database validation
-    - Complete auth API routes (CRUD operations)
     - Support for multiple API keys per user
 
 16. **Unit Testing Suite** ✅
