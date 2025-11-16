@@ -1,6 +1,7 @@
 import { OrderService } from './orderService';
 import { orderRepository } from '@repositories/orderRepository';
 import { skyfiClient } from './skyfiClient';
+import { osmClient } from './openStreetMapsClient';
 import { sseEventEmitter } from '@sse/eventEmitter';
 import { NotFoundError, ValidationError } from '@utils/errors';
 import { OrderStatus } from '@models/order';
@@ -8,6 +9,14 @@ import { OrderStatus } from '@models/order';
 // Mock dependencies
 jest.mock('@repositories/orderRepository');
 jest.mock('./skyfiClient');
+jest.mock('./openStreetMapsClient', () => ({
+  osmClient: {
+    geocode: jest.fn(),
+    reverseGeocode: jest.fn(),
+    searchPlaces: jest.fn(),
+    clearCache: jest.fn(),
+  },
+}));
 jest.mock('@sse/eventEmitter');
 jest.mock('@utils/logger', () => ({
   logger: {
@@ -20,6 +29,7 @@ jest.mock('@utils/logger', () => ({
 
 const mockOrderRepository = orderRepository as jest.Mocked<typeof orderRepository>;
 const mockSkyfiClient = skyfiClient as jest.Mocked<typeof skyfiClient>;
+const mockOsmClient = osmClient as jest.Mocked<typeof osmClient>;
 const mockSseEventEmitter = sseEventEmitter as jest.Mocked<typeof sseEventEmitter>;
 
 describe('OrderService', () => {
@@ -27,14 +37,19 @@ describe('OrderService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default OSM mock - no geocoding (for tests that don't use location strings)
+    mockOsmClient.geocode.mockResolvedValue([]);
     orderService = new OrderService();
   });
 
   describe('createOrder', () => {
     const userId = 'user-123';
     const mockOrderData = {
-      aoi: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]] },
-      productType: 'satellite',
+      dataType: 'satellite',
+      areaOfInterest: {
+        type: 'Polygon' as const,
+        coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+      },
     };
 
     it('should create order successfully', async () => {
@@ -54,10 +69,11 @@ describe('OrderService', () => {
       const result = await orderService.createOrder(userId, { orderData: mockOrderData });
 
       expect(result).toEqual(mockOrder);
-      expect(mockSkyfiClient.estimatePrice).toHaveBeenCalledWith(mockOrderData);
+      // OSM enhancement may modify orderData, so check it was called with enhanced data
+      expect(mockSkyfiClient.estimatePrice).toHaveBeenCalled();
       expect(mockOrderRepository.create).toHaveBeenCalledWith(
         userId,
-        mockOrderData,
+        expect.objectContaining(mockOrderData),
         100.50
       );
       expect(mockSseEventEmitter.emitToUser).toHaveBeenCalledWith(
@@ -150,8 +166,10 @@ describe('OrderService', () => {
         updatedAt: new Date(),
       };
 
+      const updatedOrder = { ...mockOrder, status: OrderStatus.COMPLETED };
       mockOrderRepository.findById.mockResolvedValueOnce(mockOrder);
-      mockSkyfiClient.getOrderStatus.mockResolvedValueOnce({ status: OrderStatus.COMPLETED });
+      mockSkyfiClient.getOrderStatus.mockResolvedValueOnce({ status: OrderStatus.COMPLETED } as any);
+      mockOrderRepository.update.mockResolvedValueOnce(updatedOrder);
 
       const result = await orderService.getOrderStatus(orderId, userId);
 

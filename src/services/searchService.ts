@@ -99,6 +99,11 @@ export class SearchService {
    * Enhance query with OSM geocoding if location string is provided
    */
   private async enhanceQueryWithOSM(query: SearchQuery): Promise<SearchQuery> {
+    // Return early if query is invalid
+    if (!query || typeof query !== 'object') {
+      return query;
+    }
+    
     // If query has a location string but no AOI, try to geocode it
     const locationString = (query as any).location || (query as any).address;
     

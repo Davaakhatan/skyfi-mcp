@@ -175,6 +175,11 @@ export class OrderService {
    * Enhance order data with OSM geocoding if location string is provided
    */
   private async enhanceOrderDataWithOSM(orderData: any): Promise<any> {
+    // Return early if orderData is null or undefined
+    if (!orderData || typeof orderData !== 'object') {
+      return orderData;
+    }
+    
     // If order data has a location string but no areaOfInterest, try to geocode it
     const locationString = orderData.location || orderData.address;
     

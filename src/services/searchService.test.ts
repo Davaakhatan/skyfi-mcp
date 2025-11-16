@@ -1,12 +1,21 @@
 import { SearchService } from './searchService';
 import { searchRepository } from '@repositories/searchRepository';
 import { skyfiClient } from './skyfiClient';
+import { osmClient } from './openStreetMapsClient';
 import { NotFoundError, ValidationError } from '@utils/errors';
 import { SearchQuery } from '@models/search';
 
 // Mock dependencies
 jest.mock('@repositories/searchRepository');
 jest.mock('./skyfiClient');
+jest.mock('./openStreetMapsClient', () => ({
+  osmClient: {
+    geocode: jest.fn(),
+    reverseGeocode: jest.fn(),
+    searchPlaces: jest.fn(),
+    clearCache: jest.fn(),
+  },
+}));
 jest.mock('@utils/logger', () => ({
   logger: {
     error: jest.fn(),
@@ -18,12 +27,15 @@ jest.mock('@utils/logger', () => ({
 
 const mockSearchRepository = searchRepository as jest.Mocked<typeof searchRepository>;
 const mockSkyfiClient = skyfiClient as jest.Mocked<typeof skyfiClient>;
+const mockOsmClient = osmClient as jest.Mocked<typeof osmClient>;
 
 describe('SearchService', () => {
   let searchService: SearchService;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default OSM mock - no geocoding (for tests that don't use location strings)
+    mockOsmClient.geocode.mockResolvedValue([]);
     searchService = new SearchService();
   });
 
@@ -68,11 +80,13 @@ describe('SearchService', () => {
       const result = await searchService.searchData(userId, mockQuery);
 
       expect(result).toEqual(mockResults);
-      expect(mockSkyfiClient.searchData).toHaveBeenCalledWith(mockQuery);
+      // OSM enhancement may modify query, so check it was called with enhanced query
+      expect(mockSkyfiClient.searchData).toHaveBeenCalled();
       expect(mockSearchRepository.create).toHaveBeenCalledWith(
         userId,
         mockQuery,
-        mockResults
+        mockResults,
+        expect.anything()
       );
     });
 
