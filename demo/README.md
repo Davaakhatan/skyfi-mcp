@@ -22,10 +22,11 @@ A Next.js-based demo using Vercel AI SDK that shows:
 **Location**: `ai-sdk-demo/`
 
 ### 3. ADK Demo Agent
-A basic ADK integration example showing:
-- Tool registration
-- Tool execution
-- Error handling
+A complete ADK integration example showing:
+- Direct tool execution
+- Natural language command parsing
+- Interactive CLI interface
+- All 6 SkyFi MCP tools
 
 **Location**: `adk-demo/`
 

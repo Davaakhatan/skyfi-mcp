@@ -48,6 +48,8 @@
 - ✅ Integrated OpenStreetMaps with search and order workflows
 - ✅ Added automatic geocoding for location strings
 - ✅ Fixed unit tests for OSM integration (all 20 tests passing)
+- ✅ Completed all three demo agents (LangChain, AI SDK, ADK)
+- ✅ ADK demo with interactive CLI and natural language parsing
 - ✅ Created base framework integration structure
 - ✅ Added common types and utilities for framework integrations
 - ✅ Implemented LangChain integration (6 tools + example)

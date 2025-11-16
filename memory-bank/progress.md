@@ -3,7 +3,7 @@
 ## Project Status
 
 **Overall Status**: 🟢 Active Development  
-**Completion**: ~60%  
+**Completion**: ~65%  
 **Current Phase**: Phase 2 - Core Features (In Progress)
 
 ---
@@ -249,9 +249,10 @@
 - **Next Steps**: API endpoint docs, integration guides, code examples, development guide
 
 ### Demo Agent
-- **Status**: Not Started
-- **Progress**: 0%
-- **Next Steps**: Design demo scenarios, implementation
+- **Status**: Complete
+- **Progress**: 100%
+- **Completed**: LangChain demo (CLI), AI SDK demo (Next.js web app), ADK demo (CLI with direct tool execution)
+- **Next Steps**: Optional enhancements (streaming, web UI for ADK demo)
 
 ---
 
