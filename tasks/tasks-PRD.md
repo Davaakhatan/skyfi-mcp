@@ -26,13 +26,14 @@
 
 ### In Progress 🔄
 - Authentication and Credential Management (90%)
-- OpenStreetMaps Integration (70%)
+- OpenStreetMaps Integration (85% - integrated with search/order workflows)
 - Monitoring and Webhook Notifications (90%)
 - Integration Testing (95% - all major workflows and API endpoints complete - 52 tests passing)
 
 ### Next Priority Tasks
-1. OpenStreetMaps integration with search/order workflows
+1. Fix unit tests for OSM integration in search/order services
 2. Framework integrations (ADK, LangChain, AI SDK)
+3. Demo agent development
 3. Framework integrations (ADK, LangChain, AI SDK)
 4. Demo agent development
 5. OAuth 2.0 flow design (if applicable)
