@@ -100,7 +100,17 @@ Once you have the API keys configured, I'll be able to actually search, order, a
       });
     }
 
-    const { messages } = await req.json();
+    let messages;
+    try {
+      const body = await req.json();
+      messages = body.messages;
+      if (!messages || !Array.isArray(messages)) {
+        throw new Error('Invalid request: messages must be an array');
+      }
+    } catch (parseError) {
+      console.error('Failed to parse request body:', parseError);
+      throw new Error('Invalid request body. Expected JSON with messages array.');
+    }
 
     if (!hasOpenAI) {
       throw new Error('OPENAI_API_KEY is required for AI responses');
