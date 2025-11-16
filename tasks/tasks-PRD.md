@@ -34,9 +34,8 @@
 1. End-to-end API endpoint integration tests
 2. OpenStreetMaps integration with search/order workflows
 3. Framework integrations (ADK, LangChain, AI SDK)
-4. Framework integrations (ADK, LangChain, AI SDK)
-5. Demo agent development
-6. OAuth 2.0 flow design (if applicable)
+4. Demo agent development
+5. OAuth 2.0 flow design (if applicable)
 
 ---
 
