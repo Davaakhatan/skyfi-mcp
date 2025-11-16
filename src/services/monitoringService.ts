@@ -131,10 +131,8 @@ export class MonitoringService {
     updates: Partial<MonitoringCreateRequest>
   ): Promise<Monitoring> {
     try {
-      const monitoring = await monitoringRepository.findById(
-        monitoringId,
-        userId
-      );
+      // Verify monitoring exists (throws if not found)
+      await monitoringRepository.findById(monitoringId, userId);
 
       // Validate updates
       if (updates.aoiData) {
