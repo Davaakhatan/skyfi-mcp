@@ -4,38 +4,82 @@ import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/inte
 
 const skyfiApiKey = process.env.SKYFI_API_KEY || '';
 const skyfiBaseUrl = process.env.SKYFI_BASE_URL;
+const openaiApiKey = process.env.OPENAI_API_KEY || '';
 
-if (!skyfiApiKey) {
-  throw new Error('SKYFI_API_KEY environment variable is required');
-}
+// Demo mode: allow UI to work without API keys (will show demo messages)
+const isDemoMode = !skyfiApiKey || !openaiApiKey;
 
 const skyfiConfig = {
-  apiKey: skyfiApiKey,
+  apiKey: skyfiApiKey || 'demo-key',
   baseUrl: skyfiBaseUrl,
 };
 
 // Get SkyFi functions and convert to AI SDK tools
-const functionDefinitions = getSkyFiFunctions(skyfiConfig);
-const tools = functionDefinitions.reduce((acc, funcDef) => {
-  acc[funcDef.name] = tool({
-    description: funcDef.description,
-    parameters: funcDef.parameters,
-    execute: async (args: Record<string, unknown>) => {
-      try {
-        const result = await executeSkyFiFunction(skyfiConfig, funcDef.name, args);
-        return result;
-      } catch (error) {
-        return {
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
-      }
-    },
-  });
-  return acc;
-}, {} as Record<string, ReturnType<typeof tool>>);
+let tools: Record<string, ReturnType<typeof tool>> = {};
+
+if (!isDemoMode) {
+  const functionDefinitions = getSkyFiFunctions(skyfiConfig);
+  tools = functionDefinitions.reduce((acc, funcDef) => {
+    acc[funcDef.name] = tool({
+      description: funcDef.description,
+      parameters: funcDef.parameters,
+      execute: async (args: Record<string, unknown>) => {
+        try {
+          const result = await executeSkyFiFunction(skyfiConfig, funcDef.name, args);
+          return result;
+        } catch (error) {
+          return {
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
+      },
+    });
+    return acc;
+  }, {} as Record<string, ReturnType<typeof tool>>);
+}
 
 export async function POST(req: Request) {
   try {
+    // Demo mode: return demo response
+    if (isDemoMode) {
+      const { messages } = await req.json();
+      const lastMessage = messages[messages.length - 1];
+      
+      // Simulate a streaming response
+      const demoResponse = `I'm running in demo mode! 🎭
+
+To use the full SkyFi MCP features, please set up:
+- OPENAI_API_KEY in your .env.local file
+- SKYFI_API_KEY in your .env.local file
+
+For now, I can show you what the interface looks like. Try asking:
+- "Search for satellite data over San Francisco"
+- "What would it cost to get aerial imagery of New York?"
+- "Order satellite data for Central Park"
+
+Once you have the API keys configured, I'll be able to actually search, order, and manage geospatial data through the SkyFi MCP server!`;
+
+      // Create a simple streaming response
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          const words = demoResponse.split(' ');
+          for (let i = 0; i < words.length; i++) {
+            const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
+            controller.enqueue(encoder.encode(`0:"${chunk}"\n`));
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+          controller.close();
+        },
+      });
+
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+        },
+      });
+    }
+
     const { messages } = await req.json();
 
     const result = await streamText({

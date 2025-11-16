@@ -13,15 +13,20 @@ export default function Chat() {
       <div className="flex-1 overflow-y-auto mb-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-500 mt-8">
-            <h1 className="text-2xl font-bold mb-2">SkyFi MCP Demo Agent</h1>
+            <h1 className="text-2xl font-bold mb-2">🌍 SkyFi MCP Demo Agent</h1>
             <p className="mb-4">Ask me about geospatial data services!</p>
             <div className="text-left max-w-md mx-auto space-y-2">
-              <p className="text-sm">Try asking:</p>
+              <p className="text-sm font-semibold">Try asking:</p>
               <ul className="text-sm list-disc list-inside space-y-1">
                 <li>"Search for satellite data over San Francisco"</li>
                 <li>"What would it cost to get aerial imagery of New York?"</li>
                 <li>"Order satellite data for Central Park"</li>
               </ul>
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-800">
+                  💡 <strong>Demo Mode:</strong> Set OPENAI_API_KEY and SKYFI_API_KEY in .env.local for full functionality
+                </p>
+              </div>
             </div>
           </div>
         )}
