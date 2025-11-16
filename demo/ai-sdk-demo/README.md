@@ -25,14 +25,31 @@ npm install
 
 ## Configuration
 
-Create a `.env.local` file:
+**Create `.env.local` file in the `demo/ai-sdk-demo/` directory** (not in the main MCP directory):
+
+```bash
+cd demo/ai-sdk-demo
+cp .env.local.example .env.local
+# Then edit .env.local with your actual API keys
+```
+
+Or manually create `demo/ai-sdk-demo/.env.local`:
 
 ```env
+# Required for AI responses
 OPENAI_API_KEY=your-openai-api-key
+
+# Optional - add when SkyFi API key is available
 SKYFI_API_KEY=your-skyfi-api-key
+
+# Optional - defaults to http://localhost:3000/v1
 SKYFI_BASE_URL=http://localhost:3000/v1
-NEXT_PUBLIC_SKYFI_BASE_URL=http://localhost:3000/v1
 ```
+
+**Note:** 
+- The `.env.local` file should be in `demo/ai-sdk-demo/` (the Next.js app root)
+- `OPENAI_API_KEY` is required for AI responses
+- `SKYFI_API_KEY` is optional - demo works with just OpenAI, but SkyFi tools will be in demo mode until you add it
 
 ## Usage
 
