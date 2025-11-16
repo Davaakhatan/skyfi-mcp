@@ -1,5 +1,6 @@
 import { orderRepository } from '@repositories/orderRepository';
 import { skyfiClient } from './skyfiClient';
+import { osmClient } from './openStreetMapsClient';
 import { Order, OrderCreateRequest, OrderStatus } from '@models/order';
 import { NotFoundError, ValidationError } from '@utils/errors';
 import { logger } from '@utils/logger';
@@ -15,17 +16,20 @@ export class OrderService {
    */
   async createOrder(userId: string, request: OrderCreateRequest): Promise<Order> {
     try {
+      // Enhance order data with OSM geocoding if location string is provided
+      const enhancedOrderData = await this.enhanceOrderDataWithOSM(request.orderData);
+      
       // Validate order data
-      this.validateOrderData(request.orderData);
+      this.validateOrderData(enhancedOrderData);
 
       // Estimate price first
-      const priceEstimate = await skyfiClient.estimatePrice(request.orderData);
+      const priceEstimate = await skyfiClient.estimatePrice(enhancedOrderData);
       const price = (priceEstimate as any)?.estimatedTotal || (priceEstimate as any)?.price;
 
-      // Create order in database
+      // Create order in database (store enhanced data)
       const order = await orderRepository.create(
         userId,
-        request.orderData,
+        enhancedOrderData,
         price
       );
 
@@ -165,6 +169,68 @@ export class OrderService {
       logger.error('Failed to create SkyFi order', { error, orderId: order.id });
       throw error;
     }
+  }
+
+  /**
+   * Enhance order data with OSM geocoding if location string is provided
+   */
+  private async enhanceOrderDataWithOSM(orderData: any): Promise<any> {
+    // If order data has a location string but no areaOfInterest, try to geocode it
+    const locationString = orderData.location || orderData.address;
+    
+    if (locationString && !orderData.areaOfInterest) {
+      try {
+        logger.debug('Geocoding location for order', { location: locationString });
+        const geocodeResult = await osmClient.geocode(locationString);
+        
+        // Extract coordinates from OSM response
+        const results = Array.isArray(geocodeResult) ? geocodeResult : [geocodeResult];
+        if (results.length > 0 && results[0]) {
+          const firstResult = results[0] as any;
+          const lat = parseFloat(firstResult.lat);
+          const lon = parseFloat(firstResult.lon);
+          
+          if (!isNaN(lat) && !isNaN(lon)) {
+            // Create a bounding box around the point (roughly 1km radius)
+            const buffer = 0.01; // ~1km
+            const enhancedData = {
+              ...orderData,
+              areaOfInterest: {
+                type: 'Polygon',
+                coordinates: [[
+                  [lon - buffer, lat - buffer],
+                  [lon + buffer, lat - buffer],
+                  [lon + buffer, lat + buffer],
+                  [lon - buffer, lat + buffer],
+                  [lon - buffer, lat - buffer],
+                ]],
+              },
+              // Store original location for reference
+              osmLocation: {
+                original: locationString,
+                geocoded: { lat, lon },
+                displayName: firstResult.display_name,
+              },
+            };
+            
+            logger.info('Successfully geocoded location for order', {
+              location: locationString,
+              coordinates: { lat, lon },
+            });
+            
+            return enhancedData;
+          }
+        }
+      } catch (error) {
+        logger.warn('Failed to geocode location, proceeding without OSM enhancement', {
+          error,
+          location: locationString,
+        });
+        // Continue with original data if geocoding fails
+      }
+    }
+    
+    return orderData;
   }
 
   /**

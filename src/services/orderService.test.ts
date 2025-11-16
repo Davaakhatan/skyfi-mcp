@@ -200,13 +200,14 @@ describe('OrderService', () => {
       const updatedOrder = { ...mockOrder, status: OrderStatus.CANCELLED };
 
       mockOrderRepository.findById.mockResolvedValueOnce(mockOrder);
-      mockSkyfiClient.cancelOrder.mockResolvedValueOnce({ success: true });
       mockOrderRepository.update.mockResolvedValueOnce(updatedOrder);
 
       const result = await orderService.cancelOrder(orderId, userId);
 
       expect(result.status).toBe(OrderStatus.CANCELLED);
-      expect(mockSkyfiClient.cancelOrder).toHaveBeenCalledWith('skyfi-123');
+      expect(mockOrderRepository.update).toHaveBeenCalledWith(orderId, {
+        status: OrderStatus.CANCELLED,
+      });
       expect(mockSseEventEmitter.emitToUser).toHaveBeenCalledWith(
         userId,
         'order:update',
@@ -242,7 +243,7 @@ describe('OrderService', () => {
     });
   });
 
-  describe('getUserOrders', () => {
+  describe('getOrderHistory', () => {
     it('should get user orders', async () => {
       const userId = 'user-123';
       const mockOrders = [
@@ -268,7 +269,7 @@ describe('OrderService', () => {
 
       mockOrderRepository.findByUserId.mockResolvedValueOnce(mockOrders);
 
-      const result = await orderService.getUserOrders(userId, 10, 0);
+      const result = await orderService.getOrderHistory(userId, 10, 0);
 
       expect(result).toEqual(mockOrders);
       expect(mockOrderRepository.findByUserId).toHaveBeenCalledWith(userId, 10, 0);
