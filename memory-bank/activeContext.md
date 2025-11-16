@@ -67,9 +67,6 @@
 3. **Test Database Setup**
    - Configure test database for CI/CD
    - Document test database setup process
-   - Integrate OSM data with search workflows
-   - Add geospatial context to search results
-   - Map tile access functionality
 
 4. **Client Refactoring**
    - Refactor HTTP clients (OSM, SkyFi) for dependency injection
