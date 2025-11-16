@@ -4,6 +4,7 @@ import { readRateLimiter } from '../middleware/rateLimit';
 import { searchService } from '@services/searchService';
 import { SearchQuery } from '@models/search';
 import { ValidationError } from '@utils/errors';
+import { validateUUID, validatePagination } from '@utils/validation';
 
 const router = Router();
 
@@ -50,6 +51,9 @@ router.post(
     try {
       const userId = (req as any).userId;
       const searchId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(searchId, 'searchId');
       const refinements: Partial<SearchQuery> = req.body;
 
       const results = await searchService.refineSearch(
@@ -115,6 +119,9 @@ router.get(
     try {
       const userId = (req as any).userId;
       const searchId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(searchId, 'searchId');
 
       const search = await searchService.getSearchContext(searchId, userId);
 

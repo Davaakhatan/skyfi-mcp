@@ -5,6 +5,7 @@ import { apiKeyService } from '@services/apiKeyService';
 import { credentialManager } from '@auth/credentialManager';
 import { ValidationError, NotFoundError } from '@utils/errors';
 import { query } from '@config/database';
+import { validateEmail, validateExpirationDays, validateUUID } from '@utils/validation';
 
 const router = Router();
 
@@ -25,6 +26,9 @@ router.post(
       if (!finalUserId) {
         // Create anonymous user (in production, you'd want proper user creation)
         const email = req.body.email || `user_${Date.now()}@skyfi-mcp.local`;
+        if (email && email !== `user_${Date.now()}@skyfi-mcp.local`) {
+          validateEmail(email);
+        }
         const userResult = await query(
           `INSERT INTO users (email, api_key_hash, is_active)
            VALUES ($1, $2, $3)
@@ -34,14 +38,10 @@ router.post(
         finalUserId = userResult.rows[0].id;
       }
 
-      // Parse expiration days from request (default: 365 days)
+      // Parse and validate expiration days from request (default: 365 days)
       const expiresInDays = req.body.expiresInDays 
-        ? parseInt(req.body.expiresInDays, 10) 
+        ? validateExpirationDays(req.body.expiresInDays)
         : 365;
-
-      if (expiresInDays < 1 || expiresInDays > 3650) {
-        throw new ValidationError('expiresInDays must be between 1 and 3650');
-      }
 
       // Generate API key
       const { apiKey, apiKeyRecord } = await apiKeyService.createApiKey(

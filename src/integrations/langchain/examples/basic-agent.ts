@@ -61,18 +61,18 @@ export async function example() {
   const searchResult = await executor.invoke({
     input: 'Search for satellite data over San Francisco from January 2024',
   });
-  console.log('Search Result:', searchResult);
+  // Search result contains geospatial data
 
   // Example 2: Estimate price
   const priceResult = await executor.invoke({
     input: 'What would it cost to get satellite imagery of New York City?',
   });
-  console.log('Price Estimate:', priceResult);
+  // Price estimate available
 
   // Example 3: Create order
   const orderResult = await executor.invoke({
     input: 'Order satellite data for Central Park, New York',
   });
-  console.log('Order Result:', orderResult);
+  // Order created successfully
 }
 

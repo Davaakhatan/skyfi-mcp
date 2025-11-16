@@ -20,7 +20,7 @@ export async function example() {
 
   // Get all available tools
   const tools = getSkyFiTools(config);
-  console.log('Available tools:', tools.map(t => t.name));
+  // Available tools: search, order, status, pricing, feasibility, monitoring
 
   // Example 1: Search for data
   const searchResult = await executeSkyFiTool(
@@ -31,7 +31,7 @@ export async function example() {
       dataType: 'satellite',
     }
   );
-  console.log('Search Result:', searchResult);
+  // Search result contains geospatial data matching the query
 
   // Example 2: Estimate price
   const priceResult = await executeSkyFiTool(
@@ -42,7 +42,7 @@ export async function example() {
       dataType: 'satellite',
     }
   );
-  console.log('Price Estimate:', priceResult);
+  // Price estimate contains cost breakdown
 
   // Example 3: Create order
   const orderResult = await executeSkyFiTool(
@@ -53,7 +53,7 @@ export async function example() {
       dataType: 'satellite',
     }
   );
-  console.log('Order Result:', orderResult);
+  // Order result contains order ID and status
 }
 
 /**

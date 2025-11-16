@@ -95,65 +95,65 @@ export const createSSEConnection = (
   // Add connection
   connectionManager.addConnection(connectionId, res);
 
-  // Set up event listeners
+  // Set up event listeners with proper cleanup
   const eventTypes = [
     'order:update',
     'monitoring:update',
     'notification',
   ];
 
+  // Store event handlers for cleanup
+  const eventHandlers: Array<{ eventType: string; handler: (data: unknown) => void }> = [];
+
   // Listen for user-specific events
   const userId = (req as any).userId;
   if (userId) {
     eventTypes.forEach((eventType) => {
-      sseEventEmitter.on(`${eventType}:${userId}`, (data) => {
+      const handler = (data: unknown) => {
         connectionManager.sendToConnection(connectionId, {
           type: eventType,
           data,
         });
-      });
+      };
+      sseEventEmitter.on(`${eventType}:${userId}`, handler);
+      eventHandlers.push({ eventType: `${eventType}:${userId}`, handler });
     });
   }
 
   // Listen for general events
   eventTypes.forEach((eventType) => {
-    sseEventEmitter.on(eventType, (data) => {
+    const handler = (data: unknown) => {
       connectionManager.sendToConnection(connectionId, {
         type: eventType,
         data,
       });
-    });
+    };
+    sseEventEmitter.on(eventType, handler);
+    eventHandlers.push({ eventType, handler });
   });
 
-  // Handle client disconnect
-  req.on('close', () => {
+  // Cleanup function
+  const cleanup = () => {
     connectionManager.removeConnection(connectionId, res);
-    // Remove event listeners
-    if (userId) {
-      eventTypes.forEach((eventType) => {
-        sseEventEmitter.removeAllListeners(`${eventType}:${userId}`);
-      });
-    }
-    eventTypes.forEach((eventType) => {
-      sseEventEmitter.removeAllListeners(eventType);
+    // Remove only the listeners we added for this connection
+    eventHandlers.forEach(({ eventType, handler }) => {
+      sseEventEmitter.removeListener(eventType, handler);
     });
+    clearInterval(heartbeat);
     logger.debug('SSE connection closed', { connectionId });
-  });
+  };
+
+  // Handle client disconnect
+  req.on('close', cleanup);
 
   // Send heartbeat every 30 seconds to keep connection alive
   const heartbeat = setInterval(() => {
     try {
       res.write(': heartbeat\n\n');
     } catch (error) {
-      clearInterval(heartbeat);
-      connectionManager.removeConnection(connectionId, res);
+      cleanup();
     }
   }, 30000);
-
-  // Clear heartbeat on disconnect
-  req.on('close', () => {
-    clearInterval(heartbeat);
-  });
 };
 
 /**

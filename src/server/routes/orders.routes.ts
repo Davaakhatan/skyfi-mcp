@@ -4,6 +4,7 @@ import { defaultRateLimiter, readRateLimiter } from '../middleware/rateLimit';
 import { orderService } from '@services/orderService';
 import { OrderCreateRequest } from '@models/order';
 import { ValidationError } from '@utils/errors';
+import { validateUUID, validatePagination } from '@utils/validation';
 
 const router = Router();
 
@@ -58,6 +59,9 @@ router.get(
     try {
       const userId = (req as any).userId;
       const orderId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(orderId, 'orderId');
 
       const order = await orderService.getOrder(orderId, userId);
 
@@ -88,6 +92,9 @@ router.get(
     try {
       const userId = (req as any).userId;
       const orderId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(orderId, 'orderId');
 
       const order = await orderService.getOrderStatus(orderId, userId);
 
@@ -114,8 +121,9 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const userId = (req as any).userId;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const offset = parseInt(req.query.offset as string) || 0;
+      
+      // Validate pagination parameters
+      const { limit, offset } = validatePagination(req.query.limit, req.query.offset);
 
       const orders = await orderService.getOrderHistory(userId, limit, offset);
 
@@ -151,6 +159,9 @@ router.post(
     try {
       const userId = (req as any).userId;
       const orderId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(orderId, 'orderId');
 
       const order = await orderService.cancelOrder(orderId, userId);
 

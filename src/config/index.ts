@@ -4,7 +4,7 @@ dotenv.config();
 
 export const config = {
   // Server Configuration
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   port: parseInt(process.env.PORT || '3000', 10),
   apiVersion: process.env.API_VERSION || 'v1',
 
@@ -61,8 +61,9 @@ export const config = {
 
   // Security
   security: {
-    corsOrigin: process.env.CORS_ORIGIN || '*',
-    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    corsOrigin: process.env.CORS_ORIGIN || (nodeEnv === 'production' ? '' : '*'),
+    allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',').filter(Boolean) || 
+      (nodeEnv === 'production' ? [] : ['http://localhost:3000']),
   },
 
   // Webhook Configuration
@@ -88,16 +89,30 @@ export const config = {
   },
 };
 
-// Validate required configuration
-if (!config.skyfi.apiKey && config.nodeEnv === 'production') {
-  throw new Error('SKYFI_API_KEY is required in production');
-}
+// Validate required configuration for production
+if (nodeEnv === 'production') {
+  const requiredEnvVars = [
+    { key: 'SKYFI_API_KEY', value: config.skyfi.apiKey },
+    { key: 'API_KEY_ENCRYPTION_KEY', value: config.auth.apiKeyEncryptionKey },
+    { key: 'DATABASE_URL', value: config.database.url },
+  ];
 
-if (!config.auth.jwtSecret && config.nodeEnv === 'production') {
-  throw new Error('JWT_SECRET is required in production');
-}
+  const missing = requiredEnvVars.filter(({ value }) => !value || value === '');
+  
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables for production: ${missing.map(({ key }) => key).join(', ')}`
+    );
+  }
 
-if (!config.auth.apiKeyEncryptionKey && config.nodeEnv === 'production') {
-  throw new Error('API_KEY_ENCRYPTION_KEY is required in production');
+  // Validate encryption key length
+  if (config.auth.apiKeyEncryptionKey.length < 32) {
+    throw new Error('API_KEY_ENCRYPTION_KEY must be at least 32 characters in production');
+  }
+
+  // Warn about insecure CORS
+  if (config.security.corsOrigin === '*' || config.security.allowedOrigins.length === 0) {
+    console.warn('WARNING: CORS is configured to allow all origins. This is insecure for production.');
+  }
 }
 

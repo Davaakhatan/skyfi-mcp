@@ -61,6 +61,9 @@ router.get(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
 
       const monitoring = await monitoringService.getMonitoring(
         monitoringId,
@@ -94,6 +97,9 @@ router.get(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
 
       const monitoring = await monitoringService.getMonitoringStatus(
         monitoringId,
@@ -123,6 +129,9 @@ router.put(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
       const updates: Partial<MonitoringCreateRequest> = req.body;
 
       const monitoring = await monitoringService.updateMonitoring(
@@ -166,6 +175,9 @@ router.post(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
 
       const monitoring = await monitoringService.activateMonitoring(
         monitoringId,
@@ -195,6 +207,9 @@ router.post(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
 
       const monitoring = await monitoringService.deactivateMonitoring(
         monitoringId,
@@ -224,6 +239,9 @@ router.delete(
     try {
       const userId = (req as any).userId;
       const monitoringId = req.params.id;
+      
+      // Validate UUID format
+      validateUUID(monitoringId, 'monitoringId');
 
       await monitoringService.deleteMonitoring(monitoringId, userId);
 

@@ -15,6 +15,11 @@ export class OrderService {
    * Create a new order
    */
   async createOrder(userId: string, request: OrderCreateRequest): Promise<Order> {
+    // Validate userId format
+    if (!userId || typeof userId !== 'string') {
+      throw new ValidationError('User ID is required');
+    }
+    
     try {
       // Enhance order data with OSM geocoding if location string is provided
       const enhancedOrderData = await this.enhanceOrderDataWithOSM(request.orderData);

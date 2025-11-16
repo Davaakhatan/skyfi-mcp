@@ -28,9 +28,16 @@ app.use(
 // Request ID middleware (must be early in the chain)
 app.use(requestIdMiddleware);
 
-// Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Body parsing middleware with size limits
+app.use(express.json({ 
+  limit: '10mb',
+  strict: true, // Only parse arrays and objects
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb',
+  parameterLimit: 100, // Limit number of parameters
+}));
 
 // Request logging middleware
 app.use((req: Request, _res: Response, next: NextFunction) => {

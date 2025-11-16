@@ -9,8 +9,11 @@ import { DatabaseError } from '@utils/errors';
 const poolConfig: PoolConfig = {
   connectionString: config.database.url,
   max: 20, // Maximum number of clients in the pool
+  min: 2, // Minimum number of clients to maintain
   idleTimeoutMillis: 30000, // Close idle clients after 30 seconds
   connectionTimeoutMillis: 2000, // Return an error after 2 seconds if connection cannot be established
+  statement_timeout: 30000, // 30 second query timeout
+  query_timeout: 30000, // 30 second query timeout
 };
 
 /**
