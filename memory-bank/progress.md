@@ -194,9 +194,9 @@
 - [x] Monitoring and webhook notifications (core features complete)
 - [ ] Cloud deployment support
 - [ ] Multi-user credential management
-- [ ] Demo agent development
+- [x] Demo agent development (LangChain, AI SDK, ADK all complete)
 - [ ] Comprehensive documentation
-- [ ] Framework-specific SDKs (ADK, LangChain, AI SDK)
+- [x] Framework-specific SDKs (ADK, LangChain, AI SDK)
 
 ### Phase 4: Polish & Launch (Month 7) - Not Started
 - [ ] Performance optimization
