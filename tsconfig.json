@@ -29,7 +29,8 @@
       "@models/*": ["models/*"],
       "@repositories/*": ["repositories/*"],
       "@utils/*": ["utils/*"],
-      "@auth/*": ["auth/*"]
+      "@auth/*": ["auth/*"],
+      "@sse/*": ["sse/*"]
     }
   },
   "include": ["src/**/*"],
