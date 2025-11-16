@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { authenticate, optionalAuth } from '../middleware/auth';
+import { optionalAuth } from '../middleware/auth';
 import { readRateLimiter } from '../middleware/rateLimit';
 import { pricingService } from '@services/pricingService';
 import { PricingRequest } from '@models/pricing';

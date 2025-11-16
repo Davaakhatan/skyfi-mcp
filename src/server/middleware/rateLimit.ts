@@ -16,7 +16,7 @@ export const createRateLimiter = (options?: {
     message: options?.message || 'Too many requests, please try again later',
     standardHeaders: true,
     legacyHeaders: false,
-    handler: (req, res) => {
+    handler: (_req, _res) => {
       throw new RateLimitError('Rate limit exceeded');
     },
   });

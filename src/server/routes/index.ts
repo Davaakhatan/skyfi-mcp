@@ -8,7 +8,7 @@ const router = Router();
 /**
  * API Root endpoint
  */
-router.get('/', (req: Request, res: Response) => {
+router.get('/', (_req: Request, res: Response) => {
   res.json({
     message: 'SkyFi MCP API',
     version: config.apiVersion,
@@ -28,7 +28,7 @@ router.get('/', (req: Request, res: Response) => {
 /**
  * Health check endpoint (public)
  */
-router.get('/health', (req: Request, res: Response) => {
+router.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
