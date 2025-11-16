@@ -15,9 +15,17 @@
     "declarationMap": true,
     "sourceMap": true,
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
+    "baseUrl": "../..",
     "paths": {
-      "@integrations/*": ["../../src/integrations/*"]
+      "@/*": ["src/*"],
+      "@config/*": ["src/config/*"],
+      "@services/*": ["src/services/*"],
+      "@models/*": ["src/models/*"],
+      "@repositories/*": ["src/repositories/*"],
+      "@utils/*": ["src/utils/*"],
+      "@auth/*": ["src/auth/*"],
+      "@sse/*": ["src/sse/*"],
+      "@integrations/*": ["src/integrations/*"]
     }
   },
   "include": ["src/**/*"],

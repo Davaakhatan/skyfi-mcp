@@ -4,6 +4,7 @@
  * A demonstration of SkyFi MCP integration with ADK (AI Development Kit)
  */
 
+import 'tsconfig-paths/register';
 import dotenv from 'dotenv';
 import { createSkyFiADKAgent } from './agent.js';
 import { runInteractiveDemo } from './interactive.js';

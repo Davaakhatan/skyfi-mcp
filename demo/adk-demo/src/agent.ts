@@ -4,7 +4,7 @@
  * Creates an ADK-compatible agent with SkyFi MCP tools
  */
 
-import { getSkyFiTools, executeSkyFiTool, SkyFiToolConfig } from '../../src/integrations/adk/index.js';
+import { getSkyFiTools, executeSkyFiTool, SkyFiToolConfig } from '../../../src/integrations/adk/index.js';
 
 export interface SkyFiADKAgentConfig {
   skyfiApiKey: string;
