@@ -19,6 +19,6 @@
  * ```
  */
 
-export { getSkyFiFunctions, createSearchDataFunction, createOrderDataFunction, createGetOrderStatusFunction, createEstimatePriceFunction, createCheckFeasibilityFunction, createSetupMonitoringFunction } from './functions';
+export { getSkyFiFunctions, createSearchDataFunction, createOrderDataFunction, createGetOrderStatusFunction, createEstimatePriceFunction, createCheckFeasibilityFunction, createSetupMonitoringFunction, executeSkyFiFunction } from './functions';
 export type { SkyFiFunctionConfig } from './functions';
 
