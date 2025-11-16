@@ -331,9 +331,15 @@ export class MonitoringService {
    */
   private validateWebhookUrl(url: string): void {
     try {
-      const urlObj = new URL(url);
-      if (urlObj.protocol !== 'https:' && urlObj.protocol !== 'http:') {
-        throw new ValidationError('Webhook URL must use http or https');
+      const parsedUrl = new URL(url);
+      // Only allow http and https protocols
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        throw new ValidationError('Webhook URL must use http or https protocol');
+      }
+      // Prevent localhost in production (security)
+      if (process.env.NODE_ENV === 'production' && 
+          (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1')) {
+        throw new ValidationError('Localhost webhook URLs are not allowed in production');
       }
     } catch (error) {
       if (error instanceof ValidationError) {

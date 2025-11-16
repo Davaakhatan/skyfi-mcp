@@ -78,15 +78,18 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const requests: PricingRequest[] = req.body.requests || req.body;
-
+      
+      // Validate request body
       if (!Array.isArray(requests)) {
-        res.status(400).json({
-          error: {
-            code: 'VALIDATION_ERROR',
-            message: 'Requests must be an array',
-          },
-        });
-        return;
+        throw new ValidationError('Request body must be an array of pricing requests');
+      }
+      
+      if (requests.length === 0) {
+        throw new ValidationError('At least one pricing request is required');
+      }
+      
+      if (requests.length > 10) {
+        throw new ValidationError('Maximum 10 pricing requests allowed');
       }
 
       const estimates = await pricingService.comparePricing(requests);
