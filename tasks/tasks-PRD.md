@@ -31,8 +31,8 @@
 - Integration Testing (95% - all major workflows and API endpoints complete - 52 tests passing)
 
 ### Next Priority Tasks
-1. Fix unit tests for OSM integration in search/order services
-2. Framework integrations (ADK, LangChain, AI SDK)
+1. ✅ Fix unit tests for OSM integration in search/order services
+2. Framework integrations (ADK, LangChain, AI SDK) - In Progress (base structure created)
 3. Demo agent development
 4. OAuth 2.0 flow design (if applicable)
 
