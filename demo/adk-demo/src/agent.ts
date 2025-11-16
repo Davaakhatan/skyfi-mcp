@@ -9,6 +9,7 @@ import { getSkyFiTools, executeSkyFiTool, SkyFiToolConfig } from '../../../src/i
 export interface SkyFiADKAgentConfig {
   skyfiApiKey: string;
   skyfiBaseUrl?: string;
+  isDemoMode?: boolean;
 }
 
 /**
@@ -18,6 +19,7 @@ export function createSkyFiADKAgent(config: SkyFiADKAgentConfig) {
   const {
     skyfiApiKey,
     skyfiBaseUrl,
+    isDemoMode = false,
   } = config;
 
   const toolConfig: SkyFiToolConfig = {
@@ -35,7 +37,16 @@ export function createSkyFiADKAgent(config: SkyFiADKAgentConfig) {
 
   return {
     tools,
+    isDemoMode,
     executeTool: async (toolName: string, input: Record<string, unknown>) => {
+      if (isDemoMode) {
+        // Return demo response
+        return {
+          demo: true,
+          message: `🎭 Demo Mode: This would execute "${toolName}" with input: ${JSON.stringify(input, null, 2)}`,
+          note: 'Set SKYFI_API_KEY in .env file to use real API calls',
+        };
+      }
       return executeSkyFiTool(toolConfig, toolName, input);
     },
     getTool: (toolName: string) => {

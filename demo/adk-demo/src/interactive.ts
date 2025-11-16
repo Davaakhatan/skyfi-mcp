@@ -171,7 +171,14 @@ export async function runInteractiveDemo(agent: SkyFiADKAgent) {
       const result = await agent.executeTool(command.tool, command.args);
 
       console.log('✅ Result:');
-      console.log(JSON.stringify(result, null, 2));
+      if (agent.isDemoMode && typeof result === 'object' && 'demo' in result) {
+        console.log(result.message);
+        if ('note' in result) {
+          console.log(`\n💡 ${result.note}`);
+        }
+      } else {
+        console.log(JSON.stringify(result, null, 2));
+      }
       console.log();
     } catch (error) {
       console.error('❌ Error:', error instanceof Error ? error.message : error);

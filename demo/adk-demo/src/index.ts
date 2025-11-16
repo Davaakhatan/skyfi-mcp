@@ -15,12 +15,13 @@ async function main() {
   const skyfiApiKey = process.env.SKYFI_API_KEY;
   const skyfiBaseUrl = process.env.SKYFI_BASE_URL;
 
-  if (!skyfiApiKey) {
-    console.error('Error: SKYFI_API_KEY environment variable is required');
-    console.error('\nPlease create a .env file with:');
-    console.error('SKYFI_API_KEY=your-skyfi-api-key');
-    console.error('SKYFI_BASE_URL=http://localhost:3000/v1  # Optional');
-    process.exit(1);
+  const isDemoMode = !skyfiApiKey;
+
+  if (isDemoMode) {
+    console.log('🎭 DEMO MODE: Running without API keys\n');
+    console.log('To use full functionality, create a .env file with:');
+    console.log('  SKYFI_API_KEY=your-skyfi-api-key');
+    console.log('  SKYFI_BASE_URL=http://localhost:3000/v1  # Optional\n');
   }
 
   console.log('🚀 Starting SkyFi MCP ADK Demo Agent\n');
@@ -32,8 +33,9 @@ async function main() {
 
   try {
     const agent = createSkyFiADKAgent({
-      skyfiApiKey,
+      skyfiApiKey: skyfiApiKey || 'demo-key',
       skyfiBaseUrl,
+      isDemoMode,
     });
 
     await runInteractiveDemo(agent);
