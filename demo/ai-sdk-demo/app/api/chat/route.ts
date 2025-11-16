@@ -6,8 +6,11 @@ const skyfiApiKey = process.env.SKYFI_API_KEY || '';
 const skyfiBaseUrl = process.env.SKYFI_BASE_URL;
 const openaiApiKey = process.env.OPENAI_API_KEY || '';
 
-// Demo mode: allow UI to work without API keys (will show demo messages)
-const isDemoMode = !skyfiApiKey || !openaiApiKey;
+// Demo mode: only if both API keys are missing
+// If OpenAI is available but SkyFi isn't, we can still use AI (but SkyFi tools won't work)
+const isDemoMode = !skyfiApiKey && !openaiApiKey;
+const hasOpenAI = !!openaiApiKey;
+const hasSkyFi = !!skyfiApiKey;
 
 const skyfiConfig = {
   apiKey: skyfiApiKey || 'demo-key',
@@ -17,7 +20,7 @@ const skyfiConfig = {
 // Get SkyFi functions and convert to AI SDK tools
 let tools: Record<string, ReturnType<typeof tool>> = {};
 
-if (!isDemoMode) {
+if (hasSkyFi) {
   const functionDefinitions = getSkyFiFunctions(skyfiConfig);
   tools = functionDefinitions.reduce((acc, funcDef) => {
     acc[funcDef.name] = tool({
@@ -32,6 +35,23 @@ if (!isDemoMode) {
             error: error instanceof Error ? error.message : 'Unknown error',
           };
         }
+      },
+    });
+    return acc;
+  }, {} as Record<string, ReturnType<typeof tool>>);
+} else if (hasOpenAI) {
+  // If OpenAI is available but SkyFi isn't, create demo tools that explain the situation
+  const functionDefinitions = getSkyFiFunctions(skyfiConfig);
+  tools = functionDefinitions.reduce((acc, funcDef) => {
+    acc[funcDef.name] = tool({
+      description: funcDef.description,
+      parameters: funcDef.parameters,
+      execute: async (args: Record<string, unknown>) => {
+        return {
+          demo: true,
+          message: `🎭 SkyFi API key not configured yet. This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+          note: 'Add SKYFI_API_KEY to .env.local to enable real SkyFi MCP functionality',
+        };
       },
     });
     return acc;
@@ -82,12 +102,12 @@ Once you have the API keys configured, I'll be able to actually search, order, a
 
     const { messages } = await req.json();
 
-    const result = await streamText({
-      model: openai('gpt-4'),
-      messages,
-      tools,
-      maxSteps: 5,
-      system: `You are a helpful AI assistant specialized in geospatial data services through SkyFi MCP.
+    if (!hasOpenAI) {
+      throw new Error('OPENAI_API_KEY is required for AI responses');
+    }
+
+    const systemMessage = hasSkyFi
+      ? `You are a helpful AI assistant specialized in geospatial data services through SkyFi MCP.
 
 You have access to the following SkyFi functions:
 - skyfi_search_data: Search the SkyFi data catalog for geospatial data products
@@ -99,7 +119,25 @@ You have access to the following SkyFi functions:
 
 When users ask about locations, you can use location strings (e.g., "New York, NY") which will be automatically geocoded to coordinates.
 
-Always provide clear, helpful responses and explain what actions you're taking.`,
+Always provide clear, helpful responses and explain what actions you're taking.`
+      : `You are a helpful AI assistant specialized in geospatial data services through SkyFi MCP.
+
+You have access to SkyFi functions, but the SkyFi API key is not yet configured. When users ask about geospatial data operations, you can explain what would happen, but note that the SkyFi API key needs to be added to .env.local for full functionality.
+
+You can still help users understand:
+- How to search for satellite data
+- How pricing works for geospatial data
+- How to create orders
+- How monitoring works
+
+Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
+
+    const result = await streamText({
+      model: openai('gpt-4'),
+      messages,
+      tools: Object.keys(tools).length > 0 ? tools : undefined,
+      maxSteps: 5,
+      system: systemMessage,
     });
 
     return result.toDataStreamResponse();

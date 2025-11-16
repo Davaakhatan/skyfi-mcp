@@ -23,7 +23,7 @@ export default function Chat() {
               </ul>
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-xs text-yellow-800">
-                  💡 <strong>Demo Mode:</strong> Set OPENAI_API_KEY and SKYFI_API_KEY in .env.local for full functionality
+                  💡 <strong>Setup:</strong> Add OPENAI_API_KEY to .env.local for AI responses. Add SKYFI_API_KEY when available for full functionality.
                 </p>
               </div>
             </div>
