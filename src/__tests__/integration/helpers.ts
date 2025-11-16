@@ -5,22 +5,33 @@
 
 import { Pool } from 'pg';
 import { query } from '@config/database';
+import { config } from '@config/index';
 
 let testPool: Pool | null = null;
 
 /**
  * Get a test database connection
+ * Uses TEST_DATABASE_URL or port 5433 to avoid conflicts with main postgres
  */
 export async function getTestDatabase(): Promise<Pool> {
   if (!testPool) {
-    testPool = new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10),
-      database: process.env.DB_NAME || 'skyfi_mcp_test',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-      max: 5,
-    });
+    // Use test database URL if available, otherwise use port 5433
+    const testDbUrl = config.database.testUrl;
+    if (testDbUrl) {
+      testPool = new Pool({
+        connectionString: testDbUrl,
+        max: 5,
+      });
+    } else {
+      testPool = new Pool({
+        host: process.env.DB_HOST || 'localhost',
+        port: parseInt(process.env.TEST_DB_PORT || '5433', 10), // Use 5433 for tests
+        database: process.env.TEST_DB_NAME || process.env.DB_NAME || 'skyfi_mcp_test',
+        user: process.env.DB_USER || 'postgres',
+        password: process.env.DB_PASSWORD || 'postgres',
+        max: 5,
+      });
+    }
   }
   return testPool;
 }

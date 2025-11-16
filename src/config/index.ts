@@ -17,6 +17,8 @@ export const config = {
   // Database Configuration
   database: {
     url: process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/skyfi_mcp',
+    // Test database uses port 5433 to avoid conflicts with main postgres instance
+    testUrl: process.env.TEST_DATABASE_URL || process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5433/skyfi_mcp_test',
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT || '5432', 10),
     name: process.env.DB_NAME || 'skyfi_mcp',
