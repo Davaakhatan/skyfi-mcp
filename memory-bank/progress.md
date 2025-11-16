@@ -123,9 +123,8 @@
     - AI SDK integration (6 functions with executor)
     - All integrations support location string geocoding
     - Type-safe implementations with error handling
-    - Support for multiple API keys per user
 
-16. **Unit Testing Suite** ✅
+17. **Unit Testing Suite** ✅
     - API key service tests (12 tests)
     - Credential manager tests (7 tests)
     - Order service tests (comprehensive coverage)
