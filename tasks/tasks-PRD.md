@@ -31,8 +31,8 @@
 - Integration Testing (70% - order, search, auth workflows complete - 19 tests passing)
 
 ### Next Priority Tasks
-1. Complete integration tests for all workflows (in progress - order workflow started)
-2. Fix TypeScript module path resolution for integration tests
+1. Additional integration tests (monitoring, pricing workflows)
+2. End-to-end API endpoint integration tests
 3. OpenStreetMaps integration with search/order workflows
 4. Framework integrations (ADK, LangChain, AI SDK)
 5. Demo agent development
