@@ -133,7 +133,7 @@ You can still help users understand:
 Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
 
     const result = await streamText({
-      model: openai('gpt-4'),
+      model: openai('gpt-4o-mini'), // Using gpt-4o-mini for better compatibility
       messages,
       tools: Object.keys(tools).length > 0 ? tools : undefined,
       maxSteps: 5,
@@ -143,9 +143,12 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     return result.toDataStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    console.error('Error details:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : String(error),
       }),
       {
         status: 500,
