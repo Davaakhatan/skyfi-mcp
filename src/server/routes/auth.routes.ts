@@ -183,6 +183,9 @@ router.delete(
       const userId = (req as any).userId;
       const apiKeyId = req.params.id;
 
+      // Validate UUID format
+      validateUUID(apiKeyId, 'apiKeyId');
+
       await apiKeyService.revokeApiKey(apiKeyId, userId);
 
       res.json({

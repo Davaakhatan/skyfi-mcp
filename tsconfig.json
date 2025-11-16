@@ -34,6 +34,6 @@
     }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "src/integrations/**/examples/**", "demo/**"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts", "src/integrations/**/examples/**", "src/integrations/langchain/**", "demo/**"]
 }
 

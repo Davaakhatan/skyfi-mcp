@@ -83,6 +83,9 @@ router.get(
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
 
+      // Validate pagination parameters
+      validatePagination(limit, offset);
+
       const searches = await searchService.getSearchHistory(
         userId,
         limit,

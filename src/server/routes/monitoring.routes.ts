@@ -4,6 +4,7 @@ import { defaultRateLimiter, readRateLimiter } from '../middleware/rateLimit';
 import { monitoringService } from '@services/monitoringService';
 import { MonitoringCreateRequest } from '@models/monitoring';
 import { ValidationError } from '@utils/errors';
+import { validateUUID, validatePagination } from '@utils/validation';
 
 const router = Router();
 
@@ -267,6 +268,9 @@ router.get(
       const userId = (req as any).userId;
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
+
+      // Validate pagination parameters
+      validatePagination(limit, offset);
 
       const monitoring = await monitoringService.getUserMonitoring(
         userId,

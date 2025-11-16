@@ -2,9 +2,12 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Note: nodeEnv is used in config object, so we need to define it first
+const nodeEnv = process.env.NODE_ENV || 'development';
+
 export const config = {
   // Server Configuration
-  nodeEnv,
+  nodeEnv: nodeEnv,
   port: parseInt(process.env.PORT || '3000', 10),
   apiVersion: process.env.API_VERSION || 'v1',
 
