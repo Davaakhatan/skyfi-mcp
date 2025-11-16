@@ -3,16 +3,17 @@
  * Shared helper functions for all framework integrations
  */
 
-import { config } from '@config/index';
-
 /**
  * Get the base URL for SkyFi MCP API
  */
 export function getApiBaseUrl(): string {
-  const port = config.port;
+  // Use environment variables directly to avoid importing config module
+  // which may have issues in Next.js environment
+  const port = process.env.PORT || process.env.API_PORT || '3000';
   const host = process.env.API_HOST || 'localhost';
   const protocol = process.env.API_PROTOCOL || 'http';
-  return `${protocol}://${host}:${port}/${config.apiVersion}`;
+  const apiVersion = process.env.API_VERSION || 'v1';
+  return `${protocol}://${host}:${port}/${apiVersion}`;
 }
 
 /**
