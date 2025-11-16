@@ -40,16 +40,12 @@ if (!isDemoMode) {
 
 export async function POST(req: Request) {
   try {
-    // Demo mode: return demo response
+    // Demo mode: return simple demo response
     if (isDemoMode) {
-      const { messages } = await req.json();
-      const lastMessage = messages[messages.length - 1];
-      
-      // Simulate a streaming response
       const demoResponse = `I'm running in demo mode! 🎭
 
 To use the full SkyFi MCP features, please set up:
-- OPENAI_API_KEY in your .env.local file
+- OPENAI_API_KEY in your .env.local file  
 - SKYFI_API_KEY in your .env.local file
 
 For now, I can show you what the interface looks like. Try asking:
@@ -59,15 +55,18 @@ For now, I can show you what the interface looks like. Try asking:
 
 Once you have the API keys configured, I'll be able to actually search, order, and manage geospatial data through the SkyFi MCP server!`;
 
-      // Create a simple streaming response
+      // Return a simple streaming response compatible with AI SDK
       const encoder = new TextEncoder();
       const stream = new ReadableStream({
         async start(controller) {
-          const words = demoResponse.split(' ');
-          for (let i = 0; i < words.length; i++) {
-            const chunk = words[i] + (i < words.length - 1 ? ' ' : '');
-            controller.enqueue(encoder.encode(`0:"${chunk}"\n`));
-            await new Promise(resolve => setTimeout(resolve, 50));
+          // AI SDK data stream format
+          const lines = [
+            '0:{"type":"text-delta","textDelta":"' + demoResponse.replace(/"/g, '\\"') + '"}',
+            'd:{}',
+          ];
+          for (const line of lines) {
+            controller.enqueue(encoder.encode(line + '\n'));
+            await new Promise(resolve => setTimeout(resolve, 10));
           }
           controller.close();
         },
@@ -76,6 +75,7 @@ Once you have the API keys configured, I'll be able to actually search, order, a
       return new Response(stream, {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
+          'X-Vercel-AI-Data-Stream': 'v1',
         },
       });
     }
