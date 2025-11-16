@@ -4,20 +4,25 @@ This directory contains framework-specific integration modules for SkyFi MCP, en
 
 ## Supported Frameworks
 
-### 1. ADK (AI Development Kit)
+### 1. ADK (AI Development Kit) ✅
 - Native SDK with TypeScript types
 - Tool definitions for AI agents
 - Example implementations
+- 6 tools: search, order, status, pricing, feasibility, monitoring
 
-### 2. LangChain
+### 2. LangChain ✅
 - Custom tools for LangChain agents
 - Chain composition examples
 - Integration patterns
+- 6 tools: search, order, status, pricing, feasibility, monitoring
+- Example: Basic agent implementation
 
-### 3. AI SDK
+### 3. AI SDK ✅
 - Plugin architecture
 - Function calling support
 - Streaming support
+- 6 functions: search, order, status, pricing, feasibility, monitoring
+- Compatible with Vercel AI SDK
 
 ## Structure
 
