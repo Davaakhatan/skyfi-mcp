@@ -115,12 +115,14 @@
     - Credential manager (AES-256-GCM encryption)
     - Database migration for api_keys and credentials tables
 
-16. **Framework Integrations** 🚧 (In Progress)
+16. **Framework Integrations** ✅
     - Base integration structure created
     - Common types and utilities
-    - ADK integration (pending)
-    - LangChain integration (pending)
-    - AI SDK integration (pending)
+    - ADK integration (6 tools with executor)
+    - LangChain integration (6 tools with example)
+    - AI SDK integration (6 functions with executor)
+    - All integrations support location string geocoding
+    - Type-safe implementations with error handling
     - Support for multiple API keys per user
 
 16. **Unit Testing Suite** ✅
