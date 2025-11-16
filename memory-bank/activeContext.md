@@ -54,6 +54,8 @@
 - ✅ Implemented AI SDK integration (6 functions + executor)
 - ✅ Implemented ADK integration (6 tools + executor)
 - ✅ All framework integrations complete and ready for use
+- ✅ Created LangChain demo agent with interactive CLI
+- ✅ Added demo documentation and examples
 - ✅ Fixed TypeScript warnings in middleware and routes
 - ✅ Fixed TypeScript module path resolution for @sse
 - ✅ Added database availability detection for graceful test skipping

@@ -33,7 +33,7 @@
 ### Next Priority Tasks
 1. ✅ Fix unit tests for OSM integration in search/order services
 2. ✅ Framework integrations (ADK, LangChain, AI SDK) - Complete (all 3 frameworks implemented)
-3. Demo agent development
+3. Demo agent development - In Progress (LangChain demo complete)
 4. OAuth 2.0 flow design (if applicable)
 
 ---
