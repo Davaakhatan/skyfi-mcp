@@ -64,11 +64,9 @@
    - LangChain framework integration
    - AI SDK framework integration
 
-2. **Test Database Setup**
+3. **Test Database Setup**
    - Configure test database for CI/CD
    - Document test database setup process
-
-3. **OSM Integration**
    - Integrate OSM data with search workflows
    - Add geospatial context to search results
    - Map tile access functionality

@@ -34,9 +34,7 @@
 1. Fix unit tests for OSM integration in search/order services
 2. Framework integrations (ADK, LangChain, AI SDK)
 3. Demo agent development
-3. Framework integrations (ADK, LangChain, AI SDK)
-4. Demo agent development
-5. OAuth 2.0 flow design (if applicable)
+4. OAuth 2.0 flow design (if applicable)
 
 ---
 
