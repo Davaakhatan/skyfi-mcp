@@ -3,7 +3,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from '@config/index';
 import { logger } from '@utils/logger';
-import { AppError } from '@utils/errors';
 import { requestIdMiddleware, errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { defaultRateLimiter } from './middleware/rateLimit';
 import apiRoutes from './routes/index';
@@ -34,7 +33,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Request logging middleware
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: Request, _res: Response, next: NextFunction) => {
   logger.info('Incoming request', {
     method: req.method,
     path: req.path,
@@ -48,7 +47,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.use(defaultRateLimiter);
 
 // Health check endpoint (public, no auth required)
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.status(200).json({
     status: 'healthy',
     timestamp: new Date().toISOString(),

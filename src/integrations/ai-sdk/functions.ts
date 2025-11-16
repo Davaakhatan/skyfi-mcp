@@ -42,11 +42,11 @@ function createSkyFiClient(config: SkyFiFunctionConfig) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } };
+          throw new Error(errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
-        return await response.json();
+        return await response.json() as T;
       } catch (error) {
         throw formatError(error);
       }
@@ -70,7 +70,7 @@ export interface AISDKFunction {
 /**
  * Function: Search SkyFi data catalog
  */
-export function createSearchDataFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createSearchDataFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_search_data',
     description: 'Search the SkyFi data catalog for geospatial data products. Supports searching by data type, area of interest (AOI), time range, keywords, or location string (will be geocoded automatically).',
@@ -119,7 +119,7 @@ export function createSearchDataFunction(config: SkyFiFunctionConfig): AISDKFunc
 /**
  * Function: Create a data order
  */
-export function createOrderDataFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createOrderDataFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_create_order',
     description: 'Create an order for geospatial data. Supports location strings (will be geocoded) or direct area of interest coordinates.',
@@ -170,7 +170,7 @@ export function createOrderDataFunction(config: SkyFiFunctionConfig): AISDKFunct
 /**
  * Function: Get order status
  */
-export function createGetOrderStatusFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createGetOrderStatusFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_get_order_status',
     description: 'Get the current status of a data order by order ID.',
@@ -190,7 +190,7 @@ export function createGetOrderStatusFunction(config: SkyFiFunctionConfig): AISDK
 /**
  * Function: Estimate price
  */
-export function createEstimatePriceFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createEstimatePriceFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_estimate_price',
     description: 'Estimate the price for a data order before placing it. Supports location strings or direct coordinates.',
@@ -239,7 +239,7 @@ export function createEstimatePriceFunction(config: SkyFiFunctionConfig): AISDKF
 /**
  * Function: Check feasibility
  */
-export function createCheckFeasibilityFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createCheckFeasibilityFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_check_feasibility',
     description: 'Check if a data request is feasible before placing an order.',
@@ -288,7 +288,7 @@ export function createCheckFeasibilityFunction(config: SkyFiFunctionConfig): AIS
 /**
  * Function: Setup monitoring
  */
-export function createSetupMonitoringFunction(config: SkyFiFunctionConfig): AISDKFunction {
+export function createSetupMonitoringFunction(_config: SkyFiFunctionConfig): AISDKFunction {
   return {
     name: 'skyfi_setup_monitoring',
     description: 'Setup monitoring for an area of interest. Will notify when new data becomes available.',

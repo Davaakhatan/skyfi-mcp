@@ -4,7 +4,10 @@
 
 export interface SearchQuery {
   dataType?: string;
-  areaOfInterest?: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  areaOfInterest?: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
   timeRange?: {
     start: string;
     end: string;
@@ -18,7 +21,10 @@ export interface SearchQuery {
 export interface SearchResult {
   id: string;
   dataType: string;
-  areaOfInterest: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  areaOfInterest: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
   timeRange: {
     start: string;
     end: string;

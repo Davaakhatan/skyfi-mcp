@@ -44,11 +44,11 @@ function createSkyFiClient(config: SkyFiToolConfig) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } };
+          throw new Error(errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
-        return await response.json();
+        return await response.json() as T;
       } catch (error) {
         throw formatError(error);
       }
@@ -76,7 +76,7 @@ export function createSearchDataTool(config: SkyFiToolConfig) {
       }).optional(),
       keywords: z.array(z.string()).optional().describe('Keywords to search for'),
     }),
-    func: async (input) => {
+    func: async (input: Record<string, unknown>) => {
       const client = createSkyFiClient(config);
       const response = await client.request<FrameworkSearchResponse>('/search', {
         method: 'POST',
@@ -108,7 +108,7 @@ export function createOrderDataTool(config: SkyFiToolConfig) {
       resolution: z.string().optional().describe('Desired resolution'),
       format: z.string().optional().describe('Desired data format'),
     }),
-    func: async (input) => {
+    func: async (input: Record<string, unknown>) => {
       const client = createSkyFiClient(config);
       const response = await client.request<FrameworkOrderResponse>('/orders', {
         method: 'POST',
@@ -129,7 +129,7 @@ export function createGetOrderStatusTool(config: SkyFiToolConfig) {
     schema: z.object({
       orderId: z.string().describe('The order ID to check'),
     }),
-    func: async (input) => {
+    func: async (input: { orderId: string }) => {
       const client = createSkyFiClient(config);
       const response = await client.request<FrameworkOrderResponse>(`/orders/${input.orderId}`);
       return JSON.stringify(response);
@@ -158,7 +158,7 @@ export function createEstimatePriceTool(config: SkyFiToolConfig) {
       resolution: z.string().optional(),
       format: z.string().optional(),
     }),
-    func: async (input) => {
+    func: async (input: Record<string, unknown>) => {
       const client = createSkyFiClient(config);
       const response = await client.request<FrameworkPricingResponse>('/pricing/estimate', {
         method: 'POST',
@@ -190,7 +190,7 @@ export function createCheckFeasibilityTool(config: SkyFiToolConfig) {
       resolution: z.string().optional(),
       format: z.string().optional(),
     }),
-    func: async (input) => {
+    func: async (input: Record<string, unknown>) => {
       const client = createSkyFiClient(config);
       const response = await client.request<FrameworkFeasibilityResponse>('/pricing/feasibility', {
         method: 'POST',
@@ -218,7 +218,7 @@ export function createSetupMonitoringTool(config: SkyFiToolConfig) {
       frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
       notifyOnChange: z.boolean().optional().describe('Notify when data changes'),
     }),
-    func: async (input) => {
+    func: async (input: Record<string, unknown>) => {
       const client = createSkyFiClient(config);
       const { location, ...rest } = input;
       const requestBody: any = { ...rest };

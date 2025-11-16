@@ -60,11 +60,11 @@ function createSkyFiClient(config: SkyFiToolConfig) {
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({})) as { error?: { message?: string } };
+          throw new Error(errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`);
         }
 
-        return await response.json();
+        return await response.json() as T;
       } catch (error) {
         throw formatError(error);
       }
@@ -75,7 +75,7 @@ function createSkyFiClient(config: SkyFiToolConfig) {
 /**
  * Tool: Search SkyFi data catalog
  */
-export function createSearchDataTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createSearchDataTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_search_data',
     description: 'Search the SkyFi data catalog for geospatial data products. Supports searching by data type, area of interest (AOI), time range, keywords, or location string (will be geocoded automatically).',
@@ -111,7 +111,7 @@ export function createSearchDataTool(config: SkyFiToolConfig): ADKToolDefinition
 /**
  * Tool: Create a data order
  */
-export function createOrderDataTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createOrderDataTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_create_order',
     description: 'Create an order for geospatial data. Supports location strings (will be geocoded) or direct area of interest coordinates.',
@@ -150,7 +150,7 @@ export function createOrderDataTool(config: SkyFiToolConfig): ADKToolDefinition 
 /**
  * Tool: Get order status
  */
-export function createGetOrderStatusTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createGetOrderStatusTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_get_order_status',
     description: 'Get the current status of a data order by order ID.',
@@ -170,7 +170,7 @@ export function createGetOrderStatusTool(config: SkyFiToolConfig): ADKToolDefini
 /**
  * Tool: Estimate price
  */
-export function createEstimatePriceTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createEstimatePriceTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_estimate_price',
     description: 'Estimate the price for a data order before placing it. Supports location strings or direct coordinates.',
@@ -207,7 +207,7 @@ export function createEstimatePriceTool(config: SkyFiToolConfig): ADKToolDefinit
 /**
  * Tool: Check feasibility
  */
-export function createCheckFeasibilityTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createCheckFeasibilityTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_check_feasibility',
     description: 'Check if a data request is feasible before placing an order.',
@@ -244,7 +244,7 @@ export function createCheckFeasibilityTool(config: SkyFiToolConfig): ADKToolDefi
 /**
  * Tool: Setup monitoring
  */
-export function createSetupMonitoringTool(config: SkyFiToolConfig): ADKToolDefinition {
+export function createSetupMonitoringTool(_config: SkyFiToolConfig): ADKToolDefinition {
   return {
     name: 'skyfi_setup_monitoring',
     description: 'Setup monitoring for an area of interest. Will notify when new data becomes available.',

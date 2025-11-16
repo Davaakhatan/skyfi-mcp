@@ -12,6 +12,6 @@
  * ```
  */
 
-export { getSkyFiTools, createSearchDataTool, createOrderDataTool, createGetOrderStatusTool, createEstimatePriceTool, createCheckFeasibilityTool, createSetupMonitoringTool } from './tools';
+export { getSkyFiTools, createSearchDataTool, createOrderDataTool, createGetOrderStatusTool, createEstimatePriceTool, createCheckFeasibilityTool, createSetupMonitoringTool, executeSkyFiTool } from './tools';
 export type { SkyFiToolConfig, ADKToolDefinition } from './tools';
 

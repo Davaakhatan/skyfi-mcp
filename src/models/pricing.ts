@@ -28,7 +28,10 @@ export interface FeasibilityCheck {
 
 export interface PricingRequest {
   dataType?: string;
-  areaOfInterest?: GeoJSON.Polygon | GeoJSON.MultiPolygon;
+  areaOfInterest?: {
+    type: 'Polygon' | 'MultiPolygon';
+    coordinates: number[][][] | number[][][][];
+  };
   timeRange?: {
     start: string;
     end: string;

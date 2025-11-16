@@ -68,7 +68,7 @@ const connectionManager = new SSEConnectionManager();
  * SSE middleware - sets up Server-Sent Events connection
  */
 export const sseMiddleware = (
-  req: Request,
+  _req: Request,
   res: Response,
   next: NextFunction
 ): void => {

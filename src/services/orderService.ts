@@ -34,10 +34,14 @@ export class OrderService {
       );
 
       // Create order in SkyFi (async - don't block)
-      this.createSkyFiOrder(order).catch((error) => {
+      this.createSkyFiOrder(order).catch(async (error) => {
         logger.error('Failed to create SkyFi order', { error, orderId: order.id });
         // Update order status to failed
-        orderRepository.update(order.id, { status: OrderStatus.FAILED });
+        try {
+          await orderRepository.update(order.id, { status: OrderStatus.FAILED });
+        } catch (updateError) {
+          logger.error('Failed to update order status to failed', { error: updateError, orderId: order.id });
+        }
       });
 
       // Emit SSE event
