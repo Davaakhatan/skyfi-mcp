@@ -278,21 +278,42 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // The result from streamText has a fullStream property that contains the data stream
-    // @ai-sdk/react v2 expects this format
-    const resultAny = result as any;
-    const stream = resultAny.fullStream || resultAny.textStream || resultAny.stream;
+    // fullStream is an AsyncIterableStream<TextStreamPart> that needs to be converted
+    // to a ReadableStream for the Response
+    // We'll convert the fullStream to a ReadableStream that @ai-sdk/react v2 can consume
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Convert AsyncIterableStream to ReadableStream
+          for await (const chunk of result.fullStream) {
+            // Format chunk for @ai-sdk/react v2 data stream format
+            if (chunk.type === 'text-delta') {
+              const line = `0:${JSON.stringify({ type: 'text-delta', textDelta: chunk.textDelta })}\n`;
+              controller.enqueue(encoder.encode(line));
+            } else if (chunk.type === 'tool-call') {
+              const line = `0:${JSON.stringify({ type: 'tool-call', toolCall: chunk })}\n`;
+              controller.enqueue(encoder.encode(line));
+            } else if (chunk.type === 'tool-result') {
+              const line = `0:${JSON.stringify({ type: 'tool-result', toolResult: chunk })}\n`;
+              controller.enqueue(encoder.encode(line));
+            }
+          }
+          // End marker
+          controller.enqueue(encoder.encode('d:{}\n'));
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
     
-    if (stream) {
-      return new Response(stream, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-        },
-      });
-    } else {
-      // Fallback: try to access the stream from the result
-      throw new Error('No stream found on StreamTextResult. Available properties: ' + Object.keys(result).join(', '));
-    }
+    return new Response(readableStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'X-Vercel-AI-Data-Stream': 'v1',
+      },
+    });
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
