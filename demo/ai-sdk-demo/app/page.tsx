@@ -13,9 +13,17 @@ export default function Chat() {
     },
   });
   
-  // Debug: Log messages array changes
+  // Debug: Log messages array changes with more detail
   React.useEffect(() => {
     console.log('Messages updated:', messages.length, messages);
+    messages.forEach((msg, idx) => {
+      console.log(`  Message ${idx}:`, {
+        role: msg.role,
+        id: msg.id,
+        content: msg.content?.substring(0, 50) || 'NO CONTENT',
+        parts: msg.parts?.length || 0,
+      });
+    });
   }, [messages]);
 
   const isLoading = status === 'streaming' || status === 'submitted';
@@ -51,27 +59,42 @@ export default function Chat() {
           </div>
         )}
 
-        {messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
+        {messages.map((message) => {
+          // Handle both old format (content) and new format (parts)
+          let messageText = '';
+          if (message.content) {
+            messageText = message.content;
+          } else if (message.parts && Array.isArray(message.parts)) {
+            messageText = message.parts
+              .filter((part: any) => part.type === 'text')
+              .map((part: any) => part.text)
+              .join('');
+          }
+          
+          return (
             <div
-              className={`max-w-[80%] rounded-lg p-3 ${
-                message.role === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-800'
+              key={message.id}
+              className={`flex ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              <div className="text-sm font-semibold mb-1">
-                {message.role === 'user' ? 'You' : 'SkyFi Agent'}
+              <div
+                className={`max-w-[80%] rounded-lg p-3 ${
+                  message.role === 'user'
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                }`}
+              >
+                <div className="text-sm font-semibold mb-1">
+                  {message.role === 'user' ? 'You' : 'SkyFi Agent'}
+                </div>
+                <div className="whitespace-pre-wrap">
+                  {messageText || '(empty message)'}
+                </div>
               </div>
-              <div className="whitespace-pre-wrap">{message.content}</div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {isLoading && (
           <div className="flex justify-start">
