@@ -39,8 +39,10 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 }
 
 // Helper function to convert JSON schema to Zod schema
+// AI SDK v5 tool() expects Zod schemas that can be properly serialized
 function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unknown>; required?: string[] }): z.ZodObject<any> {
-  if (schema.type !== 'object' || !schema.properties) {
+  // Ensure we always return a valid object schema
+  if (!schema || schema.type !== 'object' || !schema.properties) {
     return z.object({});
   }
 
@@ -54,12 +56,15 @@ function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unk
     switch (propSchema.type) {
       case 'string':
         zodType = z.string();
-        if (propSchema.enum) {
+        if (propSchema.enum && Array.isArray(propSchema.enum) && propSchema.enum.length > 0) {
           zodType = z.enum(propSchema.enum as [string, ...string[]]);
         }
         break;
       case 'number':
         zodType = z.number();
+        break;
+      case 'integer':
+        zodType = z.number().int();
         break;
       case 'boolean':
         zodType = z.boolean();
@@ -82,7 +87,32 @@ function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unk
         }
         break;
       case 'object':
-        zodType = z.object({}).passthrough();
+        // Handle nested objects - recursively convert if properties exist
+        if (propSchema.properties) {
+          const nestedShape: Record<string, z.ZodTypeAny> = {};
+          const nestedProps = propSchema.properties as Record<string, { type: string; description?: string }>;
+          for (const [nestedKey, nestedProp] of Object.entries(nestedProps)) {
+            switch (nestedProp.type) {
+              case 'string':
+                nestedShape[nestedKey] = z.string();
+                break;
+              case 'number':
+                nestedShape[nestedKey] = z.number();
+                break;
+              case 'array':
+                nestedShape[nestedKey] = z.array(z.any());
+                break;
+              default:
+                nestedShape[nestedKey] = z.any();
+            }
+            if (nestedProp.description) {
+              nestedShape[nestedKey] = nestedShape[nestedKey].describe(nestedProp.description);
+            }
+          }
+          zodType = z.object(nestedShape);
+        } else {
+          zodType = z.record(z.any());
+        }
         break;
       default:
         zodType = z.any();
@@ -95,6 +125,7 @@ function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unk
     shape[key] = required.includes(key) ? zodType : zodType.optional();
   }
 
+  // Always return a valid Zod object schema
   return z.object(shape);
 }
 
