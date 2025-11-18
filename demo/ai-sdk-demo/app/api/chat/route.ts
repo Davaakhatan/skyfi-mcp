@@ -105,7 +105,7 @@ const schemaMap: Record<string, z.ZodObject<any>> = {
 };
 
 // Helper function to create SkyFi tools (called at request time, not module load time)
-function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
+function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined {
   const tools: Record<string, ReturnType<typeof tool>> = {};
   
   if (hasSkyFi) {
@@ -120,6 +120,9 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
         
         // Try to create the tool, catch any schema errors
         try {
+          // Debug: Log schema before creating tool
+          console.log(`Creating tool ${funcDef.name} with schema:`, JSON.stringify(zodSchema._def, null, 2));
+          
           tools[funcDef.name] = tool({
             description: funcDef.description,
             parameters: zodSchema,
