@@ -112,20 +112,12 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
-        const zodSchema = schemaMap[funcDef.name];
-        if (!zodSchema) {
-          console.warn(`No schema found for ${funcDef.name}, skipping`);
-          continue;
-        }
-        
-        // Try to create the tool, catch any schema errors
+        // Use the JSON schema directly from functionDefinitions instead of Zod
+        // This avoids serialization issues
         try {
-          // Debug: Log schema before creating tool
-          console.log(`Creating tool ${funcDef.name} with schema:`, JSON.stringify(zodSchema._def, null, 2));
-          
           tools[funcDef.name] = tool({
             description: funcDef.description,
-            parameters: zodSchema,
+            parameters: funcDef.parameters as any, // Use JSON schema directly
           execute: async (args: Record<string, unknown>) => {
             try {
               // Check server availability before making request
