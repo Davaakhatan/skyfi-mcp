@@ -99,28 +99,35 @@ const skyFiSchemas = {
   }),
 };
 
+// Map function names to their Zod schemas
+const schemaMap: Record<string, z.ZodObject<any>> = {
+  skyfi_search_data: skyFiSchemas.searchData,
+  skyfi_create_order: skyFiSchemas.createOrder,
+  skyfi_get_order_status: skyFiSchemas.getOrderStatus,
+  skyfi_estimate_price: skyFiSchemas.estimatePrice,
+  skyfi_check_feasibility: skyFiSchemas.checkFeasibility,
+  skyfi_setup_monitoring: skyFiSchemas.setupMonitoring,
+};
+
 // Helper function to create SkyFi tools (called at request time, not module load time)
 function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
-  
-  // Map function names to their Zod schemas
-  const schemaMap: Record<string, z.ZodObject<any>> = {
-    skyfi_search_data: skyFiSchemas.searchData,
-    skyfi_create_order: skyFiSchemas.createOrder,
-    skyfi_get_order_status: skyFiSchemas.getOrderStatus,
-    skyfi_estimate_price: skyFiSchemas.estimatePrice,
-    skyfi_check_feasibility: skyFiSchemas.checkFeasibility,
-    skyfi_setup_monitoring: skyFiSchemas.setupMonitoring,
-  };
   
   if (hasSkyFi) {
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
-        const zodSchema = schemaMap[funcDef.name] || z.object({});
-        tools[funcDef.name] = tool({
-          description: funcDef.description,
-          parameters: zodSchema,
+        const zodSchema = schemaMap[funcDef.name];
+        if (!zodSchema) {
+          console.warn(`No schema found for ${funcDef.name}, skipping`);
+          continue;
+        }
+        
+        // Try to create the tool, catch any schema errors
+        try {
+          tools[funcDef.name] = tool({
+            description: funcDef.description,
+            parameters: zodSchema,
           execute: async (args: Record<string, unknown>) => {
             try {
               // Check server availability before making request
