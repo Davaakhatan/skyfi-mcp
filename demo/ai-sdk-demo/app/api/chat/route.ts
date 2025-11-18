@@ -46,11 +46,8 @@ const skyFiSchemas = {
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -63,11 +60,8 @@ const skyFiSchemas = {
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -85,11 +79,8 @@ const skyFiSchemas = {
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -102,11 +93,8 @@ const skyFiSchemas = {
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -117,18 +105,12 @@ const skyFiSchemas = {
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest'),
     aoiData: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
-      coordinates: z.union([
-        z.array(z.array(z.array(z.number()))), // Polygon
-        z.array(z.array(z.array(z.array(z.number())))), // MultiPolygon
-      ]),
-    }).optional().describe('GeoJSON area of interest (alternative name)'),
+      coordinates: z.array(z.unknown()),
+    }).passthrough().optional().describe('GeoJSON area of interest (alternative name)'),
     frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
     webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
     dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
