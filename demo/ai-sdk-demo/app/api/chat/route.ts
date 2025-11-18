@@ -303,34 +303,9 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Return textStream directly - AI SDK v5 handles the formatting
-    // Convert AsyncIterableStream to ReadableStream
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          // Use textStream directly - it's already formatted correctly
-          for await (const chunk of result.textStream) {
-            // textStream yields plain strings, format as data stream
-            const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
-            controller.enqueue(encoder.encode(dataLine));
-          }
-          // Done marker
-          controller.enqueue(encoder.encode('d:{}\n'));
-          controller.close();
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.error(error);
-        }
-      },
-    });
-    
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'X-Vercel-AI-Data-Stream': 'v1',
-      },
-    });
+    // Try returning the stream directly from result
+    // AI SDK v5 should handle the formatting automatically
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');

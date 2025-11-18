@@ -8,7 +8,6 @@ export default function Chat() {
   const [input, setInput] = useState('');
   const { messages, sendMessage, status, error } = useChat({
     api: '/api/chat',
-    streamProtocol: 'data',
     onError: (error) => {
       console.error('Chat error:', error);
     },
