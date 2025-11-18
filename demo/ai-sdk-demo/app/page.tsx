@@ -60,9 +60,24 @@ export default function Chat() {
             </div>
           </div>
         )}
+
+        {error && (
+          <div className="flex justify-start">
+            <div className="bg-red-100 border border-red-400 text-red-700 rounded-lg p-3">
+              <div className="text-sm font-semibold mb-1">Error</div>
+              <div className="text-sm">{error.message || 'An error occurred'}</div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
+      <form 
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(e);
+        }} 
+        className="flex gap-2"
+      >
         <input
           value={input}
           onChange={handleInputChange}

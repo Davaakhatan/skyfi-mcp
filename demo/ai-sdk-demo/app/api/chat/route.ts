@@ -269,7 +269,7 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // AI SDK v3 uses toAIStreamResponse() method
+    // AI SDK v3 - use toAIStreamResponse() which is compatible with useChat
     return result.toAIStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
