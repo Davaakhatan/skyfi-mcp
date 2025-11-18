@@ -38,106 +38,100 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
   }
 }
 
-// Helper function to convert JSON schema to Zod schema
-// AI SDK v5 tool() expects Zod schemas that can be properly serialized
-function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unknown>; required?: string[] }): z.ZodObject<any> {
-  // Ensure we always return a valid object schema
-  if (!schema || schema.type !== 'object' || !schema.properties) {
-    return z.object({});
-  }
-
-  const shape: Record<string, z.ZodTypeAny> = {};
-  const required = schema.required || [];
-
-  for (const [key, prop] of Object.entries(schema.properties)) {
-    const propSchema = prop as { type: string; description?: string; items?: unknown; enum?: unknown[]; properties?: unknown };
-    let zodType: z.ZodTypeAny;
-
-    switch (propSchema.type) {
-      case 'string':
-        zodType = z.string();
-        if (propSchema.enum && Array.isArray(propSchema.enum) && propSchema.enum.length > 0) {
-          zodType = z.enum(propSchema.enum as [string, ...string[]]);
-        }
-        break;
-      case 'number':
-        zodType = z.number();
-        break;
-      case 'integer':
-        zodType = z.number().int();
-        break;
-      case 'boolean':
-        zodType = z.boolean();
-        break;
-      case 'array':
-        if (propSchema.items) {
-          const itemsSchema = propSchema.items as { type: string };
-          switch (itemsSchema.type) {
-            case 'string':
-              zodType = z.array(z.string());
-              break;
-            case 'number':
-              zodType = z.array(z.number());
-              break;
-            default:
-              zodType = z.array(z.any());
-          }
-        } else {
-          zodType = z.array(z.string()); // Default to string array
-        }
-        break;
-      case 'object':
-        // Handle nested objects - recursively convert if properties exist
-        if (propSchema.properties) {
-          const nestedShape: Record<string, z.ZodTypeAny> = {};
-          const nestedProps = propSchema.properties as Record<string, { type: string; description?: string }>;
-          for (const [nestedKey, nestedProp] of Object.entries(nestedProps)) {
-            switch (nestedProp.type) {
-              case 'string':
-                nestedShape[nestedKey] = z.string();
-                break;
-              case 'number':
-                nestedShape[nestedKey] = z.number();
-                break;
-              case 'array':
-                nestedShape[nestedKey] = z.array(z.any());
-                break;
-              default:
-                nestedShape[nestedKey] = z.any();
-            }
-            if (nestedProp.description) {
-              nestedShape[nestedKey] = nestedShape[nestedKey].describe(nestedProp.description);
-            }
-          }
-          zodType = z.object(nestedShape);
-        } else {
-          zodType = z.record(z.any());
-        }
-        break;
-      default:
-        zodType = z.any();
-    }
-
-    if (propSchema.description) {
-      zodType = zodType.describe(propSchema.description);
-    }
-
-    shape[key] = required.includes(key) ? zodType : zodType.optional();
-  }
-
-  // Always return a valid Zod object schema
-  return z.object(shape);
-}
+// Direct Zod schema definitions for SkyFi functions
+// This ensures proper serialization for AI SDK v5
+const skyFiSchemas = {
+  searchData: z.object({
+    dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
+    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
+    areaOfInterest: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).optional().describe('GeoJSON area of interest'),
+    timeRange: z.object({
+      start: z.string().describe('Start date in ISO format'),
+      end: z.string().describe('End date in ISO format'),
+    }).optional().describe('Time range for data'),
+    keywords: z.array(z.string()).optional().describe('Keywords to search for'),
+  }),
+  
+  createOrder: z.object({
+    dataType: z.string().describe('Type of data to order (e.g., "satellite", "aerial")'),
+    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
+    areaOfInterest: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).optional().describe('GeoJSON area of interest'),
+    timeRange: z.object({
+      start: z.string().describe('Start date in ISO format'),
+      end: z.string().describe('End date in ISO format'),
+    }).optional().describe('Time range for data'),
+    resolution: z.string().optional().describe('Desired resolution'),
+    format: z.string().optional().describe('Desired output format'),
+  }),
+  
+  getOrderStatus: z.object({
+    orderId: z.string().describe('The order ID to check status for'),
+  }),
+  
+  estimatePrice: z.object({
+    dataType: z.string().describe('Type of data to estimate price for'),
+    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
+    areaOfInterest: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).optional().describe('GeoJSON area of interest'),
+    timeRange: z.object({
+      start: z.string().describe('Start date in ISO format'),
+      end: z.string().describe('End date in ISO format'),
+    }).optional().describe('Time range for data'),
+    resolution: z.string().optional().describe('Desired resolution'),
+  }),
+  
+  checkFeasibility: z.object({
+    dataType: z.string().describe('Type of data to check feasibility for'),
+    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
+    areaOfInterest: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).optional().describe('GeoJSON area of interest'),
+    timeRange: z.object({
+      start: z.string().describe('Start date in ISO format'),
+      end: z.string().describe('End date in ISO format'),
+    }).optional().describe('Time range for data'),
+  }),
+  
+  setupMonitoring: z.object({
+    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
+    areaOfInterest: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).describe('GeoJSON area of interest'),
+    frequency: z.enum(['hourly', 'daily', 'weekly']).describe('Monitoring frequency'),
+    webhookUrl: z.string().optional().describe('Webhook URL for notifications'),
+    dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
+  }),
+};
 
 // Helper function to create SkyFi tools (called at request time, not module load time)
 function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
   
+  // Map function names to their Zod schemas
+  const schemaMap: Record<string, z.ZodObject<any>> = {
+    skyfi_search_data: skyFiSchemas.searchData,
+    skyfi_create_order: skyFiSchemas.createOrder,
+    skyfi_get_order_status: skyFiSchemas.getOrderStatus,
+    skyfi_estimate_price: skyFiSchemas.estimatePrice,
+    skyfi_check_feasibility: skyFiSchemas.checkFeasibility,
+    skyfi_setup_monitoring: skyFiSchemas.setupMonitoring,
+  };
+  
   if (hasSkyFi) {
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
-        const zodSchema = jsonSchemaToZod(funcDef.parameters);
+        const zodSchema = schemaMap[funcDef.name] || z.object({});
         tools[funcDef.name] = tool({
           description: funcDef.description,
           parameters: zodSchema,
@@ -184,7 +178,7 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
-        const zodSchema = jsonSchemaToZod(funcDef.parameters);
+        const zodSchema = schemaMap[funcDef.name] || z.object({});
         tools[funcDef.name] = tool({
           description: funcDef.description,
           parameters: zodSchema,
