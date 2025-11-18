@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool, toDataStreamResponse } from 'ai';
+import { streamText, tool, streamToResponse } from 'ai';
 import { z } from 'zod';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
