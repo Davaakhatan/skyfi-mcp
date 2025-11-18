@@ -325,10 +325,8 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
               controller.enqueue(encoder.encode(dataLine));
             }
           }
-          // Done marker (only if not already in stream)
-          if (!result.fullStream) {
-            controller.enqueue(encoder.encode('d:{}\n'));
-          }
+          // Always send done marker - required by @ai-sdk/react v2
+          controller.enqueue(encoder.encode('d:{}\n'));
           controller.close();
         } catch (error) {
           console.error('Stream error:', error);
