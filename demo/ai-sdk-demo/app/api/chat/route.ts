@@ -106,58 +106,6 @@ const schemaMap: Record<string, z.ZodObject<any>> = {
   skyfi_setup_monitoring: skyFiSchemas.setupMonitoring,
 };
 
-// Helper function to convert Zod schema to JSON schema manually
-function zodToJsonSchema(zodSchema: z.ZodObject<any>): any {
-  const shape = zodSchema._def.shape();
-  const properties: Record<string, any> = {};
-  const required: string[] = [];
-  
-  for (const [key, value] of Object.entries(shape)) {
-    const zodType = value as z.ZodTypeAny;
-    const def = zodType._def;
-    
-    if (def.typeName === 'ZodString') {
-      properties[key] = { type: 'string', description: def.description };
-      if (!zodType.isOptional()) {
-        required.push(key);
-      }
-    } else if (def.typeName === 'ZodArray') {
-      properties[key] = { 
-        type: 'array', 
-        items: { type: 'string' },
-        description: def.description 
-      };
-      if (!zodType.isOptional()) {
-        required.push(key);
-      }
-    } else if (def.typeName === 'ZodObject') {
-      properties[key] = { 
-        type: 'object',
-        properties: zodToJsonSchema(zodType as z.ZodObject<any>).properties,
-        description: def.description 
-      };
-      if (!zodType.isOptional()) {
-        required.push(key);
-      }
-    } else if (def.typeName === 'ZodEnum') {
-      properties[key] = { 
-        type: 'string',
-        enum: def.values,
-        description: def.description 
-      };
-      if (!zodType.isOptional()) {
-        required.push(key);
-      }
-    }
-  }
-  
-  return {
-    type: 'object',
-    properties,
-    ...(required.length > 0 && { required }),
-  };
-}
-
 // Helper function to create SkyFi tools (called at request time, not module load time)
 function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined {
   const tools: Record<string, ReturnType<typeof tool>> = {};
@@ -167,14 +115,18 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
         try {
-          const zodSchema = schemaMap[funcDef.name];
-          if (!zodSchema) {
-            console.warn(`No Zod schema found for ${funcDef.name}, skipping`);
-            continue;
-          }
+          // Use JSON schema directly from functionDefinitions
+          // Ensure it has the correct structure
+          const jsonSchema = {
+            type: 'object' as const,
+            properties: funcDef.parameters.properties || {},
+            required: funcDef.parameters.required || [],
+          };
           
-          // Convert Zod schema to JSON schema manually to avoid serialization issues
-          const jsonSchema = zodToJsonSchema(zodSchema);
+          // For searchData, ensure query is in required if it exists in properties
+          if (funcDef.name === 'skyfi_search_data' && jsonSchema.properties.query && !jsonSchema.required.includes('query')) {
+            jsonSchema.required.push('query');
+          }
           
           tools[funcDef.name] = tool({
             description: funcDef.description,

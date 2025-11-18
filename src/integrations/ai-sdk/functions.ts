@@ -77,6 +77,10 @@ export function createSearchDataFunction(_config: SkyFiFunctionConfig): AISDKFun
     parameters: {
       type: 'object',
       properties: {
+        query: {
+          type: 'string',
+          description: 'Search query or location string (e.g., "New York, NY" or "satellite data") - will be geocoded if it\'s a location',
+        },
         dataType: {
           type: 'string',
           description: 'Type of data to search for (e.g., "satellite", "aerial")',
@@ -84,19 +88,6 @@ export function createSearchDataFunction(_config: SkyFiFunctionConfig): AISDKFun
         location: {
           type: 'string',
           description: 'Location string (e.g., "New York, NY") - will be geocoded to coordinates',
-        },
-        areaOfInterest: {
-          type: 'object',
-          description: 'GeoJSON area of interest',
-          properties: {
-            type: {
-              type: 'string',
-              enum: ['Polygon', 'MultiPolygon'],
-            },
-            coordinates: {
-              type: 'array',
-            },
-          },
         },
         timeRange: {
           type: 'object',
@@ -112,6 +103,7 @@ export function createSearchDataFunction(_config: SkyFiFunctionConfig): AISDKFun
           description: 'Keywords to search for',
         },
       },
+      required: ['query'], // Ensure at least one required field
     },
   };
 }
