@@ -10,8 +10,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "ai": "^2.2.31",
-    "@ai-sdk/openai": "^0.0.59",
+    "@ai-sdk/openai": "^2.0.68",
+    "ai": "^5.0.93",
     "next": "^14.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -20,9 +20,8 @@
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
-    "typescript": "^5.3.3",
     "eslint": "^8.56.0",
-    "eslint-config-next": "^14.0.4"
+    "eslint-config-next": "^14.0.4",
+    "typescript": "^5.3.3"
   }
 }
-
