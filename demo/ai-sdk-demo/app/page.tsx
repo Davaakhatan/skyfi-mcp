@@ -2,21 +2,29 @@
 
 import { useChat } from '@ai-sdk/react';
 import { useState } from 'react';
+import React from 'react';
 
 export default function Chat() {
   const [input, setInput] = useState('');
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, append } = useChat({
     api: '/api/chat',
     onError: (error) => {
       console.error('Chat error:', error);
     },
     onResponse: (response) => {
       console.log('Response received:', response);
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
     },
     onFinish: (message) => {
       console.log('Message finished:', message);
     },
   });
+  
+  // Debug: Log messages array changes
+  React.useEffect(() => {
+    console.log('Messages updated:', messages.length, messages);
+  }, [messages]);
 
   const isLoading = status === 'streaming' || status === 'submitted';
   
