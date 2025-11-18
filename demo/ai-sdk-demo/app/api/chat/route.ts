@@ -303,29 +303,8 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Use createTextStreamResponse helper which properly formats the stream
-    // for @ai-sdk/react v2 compatibility
-    // textStream is AsyncIterableStream<string> - convert to ReadableStream
-    const textStreamReadable = new ReadableStream({
-      async start(controller) {
-        const encoder = new TextEncoder();
-        try {
-          for await (const chunk of result.textStream) {
-            controller.enqueue(encoder.encode(chunk));
-          }
-          controller.close();
-        } catch (error) {
-          controller.error(error);
-        }
-      },
-    });
-    
-    return createTextStreamResponse({
-      textStream: textStreamReadable,
-      headers: {
-        'X-Vercel-AI-Data-Stream': 'v1',
-      },
-    });
+    // Use toDataStreamResponse() which properly formats for @ai-sdk/react v2
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
