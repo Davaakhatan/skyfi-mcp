@@ -289,13 +289,15 @@ You can still help users understand:
 
 Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
 
-    // Create tools at request time (not module load time)
-    const tools = createSkyFiTools();
+    // TEMPORARILY DISABLED: Tools have schema serialization issues
+    // TODO: Fix Zod schema serialization for AI SDK v5
+    // For now, disable tools so basic chat works
+    const tools = undefined; // createSkyFiTools();
 
     const result = await streamText({
       model: openai('gpt-4o-mini'), // Using gpt-4o-mini for better compatibility
       messages,
-      tools: Object.keys(tools).length > 0 ? tools : undefined,
+      tools: tools, // Disabled for now
       maxSteps: 5,
       system: systemMessage,
     });
