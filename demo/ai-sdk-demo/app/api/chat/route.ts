@@ -1,5 +1,6 @@
 import { openai } from '@ai-sdk/openai';
 import { streamText, tool } from 'ai';
+import { z } from 'zod';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
 // Support both SKYFI_API_KEY and SKYFI_DEMO_API_KEY for flexibility
@@ -37,6 +38,52 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
   }
 }
 
+// Helper function to convert JSON schema to Zod schema
+function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unknown>; required?: string[] }): z.ZodObject<any> {
+  if (schema.type !== 'object' || !schema.properties) {
+    return z.object({});
+  }
+
+  const shape: Record<string, z.ZodTypeAny> = {};
+  const required = schema.required || [];
+
+  for (const [key, prop] of Object.entries(schema.properties)) {
+    const propSchema = prop as { type: string; description?: string; items?: unknown; enum?: unknown[]; properties?: unknown };
+    let zodType: z.ZodTypeAny;
+
+    switch (propSchema.type) {
+      case 'string':
+        zodType = z.string();
+        if (propSchema.enum) {
+          zodType = z.enum(propSchema.enum as [string, ...string[]]);
+        }
+        break;
+      case 'number':
+        zodType = z.number();
+        break;
+      case 'boolean':
+        zodType = z.boolean();
+        break;
+      case 'array':
+        zodType = z.array(z.any());
+        break;
+      case 'object':
+        zodType = z.object({}).passthrough();
+        break;
+      default:
+        zodType = z.any();
+    }
+
+    if (propSchema.description) {
+      zodType = zodType.describe(propSchema.description);
+    }
+
+    shape[key] = required.includes(key) ? zodType : zodType.optional();
+  }
+
+  return z.object(shape);
+}
+
 // Helper function to create SkyFi tools (called at request time, not module load time)
 function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
   const tools: Record<string, ReturnType<typeof tool>> = {};
@@ -45,9 +92,10 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
+        const zodSchema = jsonSchemaToZod(funcDef.parameters);
         tools[funcDef.name] = tool({
           description: funcDef.description,
-          parameters: funcDef.parameters,
+          parameters: zodSchema,
           execute: async (args: Record<string, unknown>) => {
             try {
               // Check server availability before making request
@@ -91,9 +139,10 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
     try {
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
+        const zodSchema = jsonSchemaToZod(funcDef.parameters);
         tools[funcDef.name] = tool({
           description: funcDef.description,
-          parameters: funcDef.parameters,
+          parameters: zodSchema,
           execute: async (args: Record<string, unknown>) => {
             return {
               demo: true,
