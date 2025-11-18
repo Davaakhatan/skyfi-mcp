@@ -106,9 +106,13 @@ const skyFiSchemas = {
     areaOfInterest: z.object({
       type: z.enum(['Polygon', 'MultiPolygon']),
       coordinates: z.array(z.any()),
-    }).describe('GeoJSON area of interest'),
-    frequency: z.enum(['hourly', 'daily', 'weekly']).describe('Monitoring frequency'),
-    webhookUrl: z.string().optional().describe('Webhook URL for notifications'),
+    }).optional().describe('GeoJSON area of interest'),
+    aoiData: z.object({
+      type: z.enum(['Polygon', 'MultiPolygon']),
+      coordinates: z.array(z.any()),
+    }).optional().describe('GeoJSON area of interest (alternative name)'),
+    frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
+    webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
     dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
   }),
 };
