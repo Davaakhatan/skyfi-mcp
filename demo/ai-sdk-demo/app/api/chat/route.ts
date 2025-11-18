@@ -65,7 +65,21 @@ function jsonSchemaToZod(schema: { type: string; properties?: Record<string, unk
         zodType = z.boolean();
         break;
       case 'array':
-        zodType = z.array(z.any());
+        if (propSchema.items) {
+          const itemsSchema = propSchema.items as { type: string };
+          switch (itemsSchema.type) {
+            case 'string':
+              zodType = z.array(z.string());
+              break;
+            case 'number':
+              zodType = z.array(z.number());
+              break;
+            default:
+              zodType = z.array(z.any());
+          }
+        } else {
+          zodType = z.array(z.string()); // Default to string array
+        }
         break;
       case 'object':
         zodType = z.object({}).passthrough();
