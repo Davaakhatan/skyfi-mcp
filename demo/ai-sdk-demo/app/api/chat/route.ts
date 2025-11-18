@@ -277,9 +277,22 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // @ai-sdk/react v2 with ai v5.x - use toDataStreamResponse()
-    // This creates the correct format expected by useChat
-    return result.toDataStreamResponse();
+    // @ai-sdk/react v2 with ai v5.x
+    // The result from streamText has a fullStream property that contains the data stream
+    // @ai-sdk/react v2 expects this format
+    const resultAny = result as any;
+    const stream = resultAny.fullStream || resultAny.textStream || resultAny.stream;
+    
+    if (stream) {
+      return new Response(stream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+        },
+      });
+    } else {
+      // Fallback: try to access the stream from the result
+      throw new Error('No stream found on StreamTextResult. Available properties: ' + Object.keys(result).join(', '));
+    }
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
