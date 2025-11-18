@@ -303,8 +303,28 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Return the textStream directly - @ai-sdk/react v2 can consume it
-    return new Response(result.textStream, {
+    // Use toDataStreamResponse() for proper format
+    // If that doesn't exist, convert AsyncIterableStream to ReadableStream
+    if (typeof result.toDataStreamResponse === 'function') {
+      return result.toDataStreamResponse();
+    }
+    
+    // Fallback: Convert AsyncIterableStream to ReadableStream
+    const stream = new ReadableStream({
+      async start(controller) {
+        const encoder = new TextEncoder();
+        try {
+          for await (const chunk of result.textStream) {
+            controller.enqueue(encoder.encode(chunk));
+          }
+          controller.close();
+        } catch (error) {
+          controller.error(error);
+        }
+      },
+    });
+    
+    return new Response(stream, {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'X-Vercel-AI-Data-Stream': 'v1',
