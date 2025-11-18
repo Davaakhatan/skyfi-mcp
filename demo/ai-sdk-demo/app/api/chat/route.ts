@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool, streamToResponse } from 'ai';
+import { streamText, tool } from 'ai';
 import { z } from 'zod';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
@@ -277,9 +277,14 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // @ai-sdk/react v2 expects a specific response format
-    // Use streamToResponse helper from ai v3.2.17 to create the correct format
-    return streamToResponse(result);
+    // @ai-sdk/react v2 expects a Response with textStream
+    // In Next.js App Router, we return the textStream directly as a Response
+    // The textStream is a ReadableStream that @ai-sdk/react v2 can consume
+    return new Response(result.textStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+    });
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
