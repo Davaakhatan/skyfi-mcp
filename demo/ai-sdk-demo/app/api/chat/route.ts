@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool, createTextStreamResponse } from 'ai';
+import { streamText, tool, pipeTextStreamToResponse } from 'ai';
 import { z } from 'zod';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
@@ -303,34 +303,10 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Try using pipeTextStreamToResponse or manual format
-    // For @ai-sdk/react v2, we need the data stream format
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          // Send initial stream-start marker
-          controller.enqueue(encoder.encode('0:{"type":"stream-start"}\n'));
-          
-          // Stream text chunks
-          for await (const chunk of result.textStream) {
-            const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
-            controller.enqueue(encoder.encode(dataLine));
-          }
-          
-          // Send done marker
-          controller.enqueue(encoder.encode('d:{}\n'));
-          controller.close();
-        } catch (error) {
-          console.error('Stream error:', error);
-          controller.error(error);
-        }
-      },
-    });
-    
-    return new Response(stream, {
+    // Use pipeTextStreamToResponse for proper formatting
+    return pipeTextStreamToResponse({
+      response: result,
       headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
         'X-Vercel-AI-Data-Stream': 'v1',
       },
     });
