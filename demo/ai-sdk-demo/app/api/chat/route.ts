@@ -22,10 +22,15 @@ const skyfiConfig = {
 async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
   try {
     const url = baseUrl ? `${baseUrl.replace(/\/v1$/, '')}/health` : 'http://localhost:3000/health';
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+    
     const response = await fetch(url, { 
       method: 'GET',
-      signal: AbortSignal.timeout(2000), // 2 second timeout
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     return response.ok;
   } catch {
     return false;
