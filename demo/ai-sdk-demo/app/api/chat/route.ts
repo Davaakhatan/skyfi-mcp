@@ -287,11 +287,8 @@ You can still help users understand:
 
 Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
 
-    // TEMPORARILY DISABLED: AI SDK v5 has a bug with Zod schema serialization
-    // When all fields are optional or schema structure is complex, it serializes as type: "None"
-    // This is a known issue with AI SDK v5 - see KNOWN_ISSUES.md
-    // TODO: Wait for AI SDK v5 fix or downgrade to v3
-    const tools = undefined; // createSkyFiTools();
+    // Re-enable SkyFi tools - .extend() approach fixed the serialization issue!
+    const tools = createSkyFiTools();
 
     const result = await streamText({
       model: openai('gpt-4o-mini'), // Using gpt-4o-mini for better compatibility
