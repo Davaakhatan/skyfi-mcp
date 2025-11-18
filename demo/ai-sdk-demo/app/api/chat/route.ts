@@ -2,7 +2,8 @@ import { openai } from '@ai-sdk/openai';
 import { streamText, tool } from 'ai';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
-const skyfiApiKey = process.env.SKYFI_API_KEY || '';
+// Support both SKYFI_API_KEY and SKYFI_DEMO_API_KEY for flexibility
+const skyfiApiKey = process.env.SKYFI_API_KEY || process.env.SKYFI_DEMO_API_KEY || '';
 const skyfiBaseUrl = process.env.SKYFI_BASE_URL;
 const openaiApiKey = process.env.OPENAI_API_KEY || '';
 
