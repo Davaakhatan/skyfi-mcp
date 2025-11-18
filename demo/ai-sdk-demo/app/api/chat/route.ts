@@ -314,13 +314,14 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
           const sourceStream = result.fullStream || result.textStream;
           
           for await (const chunk of sourceStream) {
-            // If it's already a string in data stream format, use it directly
-            // Otherwise format it
-            if (typeof chunk === 'string' && chunk.includes('{"type"')) {
-              controller.enqueue(encoder.encode(chunk));
-            } else {
-              // Format: 0:{"type":"text-delta","textDelta":"chunk"}
+            // fullStream chunks are objects, textStream chunks are strings
+            if (typeof chunk === 'string') {
+              // textStream: format as data stream
               const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
+              controller.enqueue(encoder.encode(dataLine));
+            } else {
+              // fullStream: already in data stream format, just stringify
+              const dataLine = `0:${JSON.stringify(chunk)}\n`;
               controller.enqueue(encoder.encode(dataLine));
             }
           }
