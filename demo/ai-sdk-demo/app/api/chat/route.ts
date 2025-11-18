@@ -92,7 +92,7 @@ const skyFiSchemas = {
   setupMonitoring: z.object({
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
     areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
-    aoiData: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object (alternative name)'),
+    aoiData: z.any().optional().describe('GeoJSON area of interest as object (alternative name)'),
     frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
     webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
     dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
