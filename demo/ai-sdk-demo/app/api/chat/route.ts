@@ -39,29 +39,31 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 }
 
 // Direct Zod schema definitions for SkyFi functions
-// Simplified: Remove areaOfInterest from schema - backend will geocode location strings automatically
-// This avoids complex GeoJSON serialization issues with AI SDK v5
+// Using .partial() instead of .optional() on each field to fix serialization
+// .partial() makes all fields optional but preserves the object structure
 const skyFiSchemas = {
   searchData: z.object({
-    query: z.string().optional().describe('Search query or location string (e.g., "New York, NY" or "satellite data") - will be geocoded if it\'s a location'),
-    dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
-    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
+    query: z.string().describe('Search query or location string (e.g., "New York, NY" or "satellite data") - will be geocoded if it\'s a location'),
+    dataType: z.string().describe('Type of data to search for (e.g., "satellite", "aerial")'),
+    location: z.string().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
-    }).optional().describe('Time range for data'),
-    keywords: z.array(z.string()).optional().describe('Keywords to search for'),
-  }),
+    }).describe('Time range for data'),
+    keywords: z.array(z.string()).describe('Keywords to search for'),
+  }).partial(), // Make all fields optional at once
   
   createOrder: z.object({
     dataType: z.string().describe('Type of data to order (e.g., "satellite", "aerial")'),
-    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
+    location: z.string().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
-    }).optional().describe('Time range for data'),
-    resolution: z.string().optional().describe('Desired resolution'),
-    format: z.string().optional().describe('Desired output format'),
+    }).describe('Time range for data'),
+    resolution: z.string().describe('Desired resolution'),
+    format: z.string().describe('Desired output format'),
+  }).partial().extend({
+    dataType: z.string().describe('Type of data to order (e.g., "satellite", "aerial")'), // Keep dataType required
   }),
   
   getOrderStatus: z.object({
@@ -70,29 +72,33 @@ const skyFiSchemas = {
   
   estimatePrice: z.object({
     dataType: z.string().describe('Type of data to estimate price for'),
-    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
+    location: z.string().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
-    }).optional().describe('Time range for data'),
-    resolution: z.string().optional().describe('Desired resolution'),
+    }).describe('Time range for data'),
+    resolution: z.string().describe('Desired resolution'),
+  }).partial().extend({
+    dataType: z.string().describe('Type of data to estimate price for'), // Keep dataType required
   }),
   
   checkFeasibility: z.object({
     dataType: z.string().describe('Type of data to check feasibility for'),
-    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
+    location: z.string().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
-    }).optional().describe('Time range for data'),
+    }).describe('Time range for data'),
+  }).partial().extend({
+    dataType: z.string().describe('Type of data to check feasibility for'), // Keep dataType required
   }),
   
   setupMonitoring: z.object({
-    location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
-    frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
-    webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
-    dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
-  }),
+    location: z.string().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
+    frequency: z.enum(['hourly', 'daily', 'weekly']).describe('Monitoring frequency'),
+    webhookUrl: z.string().url().describe('Webhook URL for notifications'),
+    dataTypes: z.array(z.string()).describe('Types of data to monitor'),
+  }).partial(),
 };
 
 // Map function names to their Zod schemas
