@@ -229,7 +229,15 @@ Once you have the API keys configured, I'll be able to actually search, order, a
     }
 
     if (!hasOpenAI) {
-      throw new Error('OPENAI_API_KEY is required for AI responses');
+      return new Response(
+        JSON.stringify({
+          error: 'OPENAI_API_KEY is required for AI responses',
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
     }
 
     const systemMessage = hasSkyFi
@@ -269,8 +277,26 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // AI SDK v3 - use toAIStreamResponse() which is compatible with useChat
-    return result.toAIStreamResponse();
+    // AI SDK v3.2.17 - StreamTextResult doesn't have toAIStreamResponse() in this version
+    // Use the baseStream property to create a response compatible with useChat
+    const resultAny = result as any;
+    
+    // Check for response methods first
+    if (typeof resultAny.toAIStreamResponse === 'function') {
+      return resultAny.toAIStreamResponse();
+    } else if (typeof resultAny.toDataStreamResponse === 'function') {
+      return resultAny.toDataStreamResponse();
+    } else if (resultAny.baseStream) {
+      // Use baseStream to create response in AI SDK data stream format
+      return new Response(resultAny.baseStream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Vercel-AI-Data-Stream': 'v1',
+        },
+      });
+    } else {
+      throw new Error('No stream found on StreamTextResult');
+    }
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
