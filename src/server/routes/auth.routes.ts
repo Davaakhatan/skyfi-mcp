@@ -21,7 +21,7 @@ router.post(
     try {
       const userId = (req as any).userId;
       
-      // If no user ID, create a new user first
+      // If no user ID, create a new user first or get existing user
       let finalUserId = userId;
       if (!finalUserId) {
         // Create anonymous user (in production, you'd want proper user creation)
@@ -29,13 +29,25 @@ router.post(
         if (email && email !== `user_${Date.now()}@skyfi-mcp.local`) {
           validateEmail(email);
         }
-        const userResult = await query(
-          `INSERT INTO users (email, api_key_hash, is_active)
-           VALUES ($1, $2, $3)
-           RETURNING id`,
-          [email, '', true]
+        
+        // Try to get existing user first
+        const existingUser = await query(
+          `SELECT id FROM users WHERE email = $1`,
+          [email]
         );
-        finalUserId = userResult.rows[0].id;
+        
+        if (existingUser.rows.length > 0) {
+          finalUserId = existingUser.rows[0].id;
+        } else {
+          // Create new user if doesn't exist
+          const userResult = await query(
+            `INSERT INTO users (email, api_key_hash, is_active)
+             VALUES ($1, $2, $3)
+             RETURNING id`,
+            [email, '', true]
+          );
+          finalUserId = userResult.rows[0].id;
+        }
       }
 
       // Parse and validate expiration days from request (default: 365 days)
