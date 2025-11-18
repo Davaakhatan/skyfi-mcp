@@ -1,14 +1,26 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
+import { useState } from 'react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+  const [input, setInput] = useState('');
+  const { messages, sendMessage, status, error } = useChat({
     api: '/api/chat',
     onError: (error) => {
       console.error('Chat error:', error);
     },
   });
+
+  const isLoading = status === 'streaming' || status === 'submitted';
+  
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (input.trim() && !isLoading) {
+      sendMessage({ role: 'user', content: input });
+      setInput('');
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto p-4">
@@ -75,15 +87,12 @@ export default function Chat() {
       </div>
 
       <form 
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(e);
-        }} 
+        onSubmit={handleSubmit}
         className="flex gap-2"
       >
         <input
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about geospatial data..."
           className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           disabled={isLoading}
