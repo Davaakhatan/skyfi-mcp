@@ -160,7 +160,12 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
               };
             }
           },
-        });
+          });
+        } catch (schemaError) {
+          console.error(`Failed to create tool ${funcDef.name} due to schema error:`, schemaError);
+          // Skip this tool but continue with others
+          continue;
+        }
       }
     } catch (error) {
       console.error('Failed to create SkyFi tools:', error);
