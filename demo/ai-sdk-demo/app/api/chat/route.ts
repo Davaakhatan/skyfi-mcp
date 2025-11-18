@@ -277,14 +277,25 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // @ai-sdk/react v2 expects a Response with textStream
-    // In Next.js App Router, we return the textStream directly as a Response
-    // The textStream is a ReadableStream that @ai-sdk/react v2 can consume
-    return new Response(result.textStream, {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-      },
-    });
+    // @ai-sdk/react v2 expects a data stream response
+    // Use the result's toDataStreamResponse() method if available
+    // Otherwise, manually create the response format
+    const resultAny = result as any;
+    
+    if (typeof resultAny.toDataStreamResponse === 'function') {
+      // This method should exist in newer versions
+      return resultAny.toDataStreamResponse();
+    } else {
+      // For ai v3.2.17, we need to create the response manually
+      // @ai-sdk/react v2 expects a specific data stream format
+      // Use the result's textStream and wrap it properly
+      return new Response(result.textStream, {
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'X-Vercel-AI-Data-Stream': 'v1',
+        },
+      });
+    }
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
