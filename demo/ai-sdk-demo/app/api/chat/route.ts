@@ -39,17 +39,13 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 }
 
 // Direct Zod schema definitions for SkyFi functions
-// Using z.union() with z.object() for optional complex objects to ensure proper serialization
-const geoJsonSchema = z.union([
-  z.object({}).passthrough(), // Accept any object structure
-  z.undefined(),
-]).optional();
-
+// Using z.any() for complex GeoJSON objects to avoid serialization issues
+// The backend will handle validation and geocoding
 const skyFiSchemas = {
   searchData: z.object({
     dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: geoJsonSchema.describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -60,7 +56,7 @@ const skyFiSchemas = {
   createOrder: z.object({
     dataType: z.string().describe('Type of data to order (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: geoJsonSchema.describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -76,7 +72,7 @@ const skyFiSchemas = {
   estimatePrice: z.object({
     dataType: z.string().describe('Type of data to estimate price for'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: geoJsonSchema.describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -87,7 +83,7 @@ const skyFiSchemas = {
   checkFeasibility: z.object({
     dataType: z.string().describe('Type of data to check feasibility for'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: geoJsonSchema.describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -96,8 +92,8 @@ const skyFiSchemas = {
   
   setupMonitoring: z.object({
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: geoJsonSchema.describe('GeoJSON area of interest as object'),
-    aoiData: geoJsonSchema.describe('GeoJSON area of interest as object (alternative name)'),
+    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
+    aoiData: z.any().optional().describe('GeoJSON area of interest as object (alternative name)'),
     frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
     webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
     dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
