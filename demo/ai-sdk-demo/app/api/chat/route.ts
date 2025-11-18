@@ -37,76 +37,78 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
   }
 }
 
-// Get SkyFi functions and convert to AI SDK tools
-let tools: Record<string, ReturnType<typeof tool>> = {};
-let mcpServerAvailable = false;
-
-// Check MCP server availability if SkyFi key is configured
-if (hasSkyFi) {
-  // Check server health asynchronously (don't block)
-  checkMCPServerHealth(skyfiBaseUrl).then(available => {
-    mcpServerAvailable = available;
-  }).catch(() => {
-    mcpServerAvailable = false;
-  });
+// Helper function to create SkyFi tools (called at request time, not module load time)
+function createSkyFiTools(): Record<string, ReturnType<typeof tool>> {
+  const tools: Record<string, ReturnType<typeof tool>> = {};
   
-  const functionDefinitions = getSkyFiFunctions(skyfiConfig);
-  tools = functionDefinitions.reduce((acc, funcDef) => {
-    acc[funcDef.name] = tool({
-      description: funcDef.description,
-      parameters: funcDef.parameters,
-      execute: async (args: Record<string, unknown>) => {
-        try {
-          // Check server availability before making request
-          const serverAvailable = await checkMCPServerHealth(skyfiBaseUrl);
-          if (!serverAvailable) {
+  if (hasSkyFi) {
+    try {
+      const functionDefinitions = getSkyFiFunctions(skyfiConfig);
+      for (const funcDef of functionDefinitions) {
+        tools[funcDef.name] = tool({
+          description: funcDef.description,
+          parameters: funcDef.parameters,
+          execute: async (args: Record<string, unknown>) => {
+            try {
+              // Check server availability before making request
+              const serverAvailable = await checkMCPServerHealth(skyfiBaseUrl);
+              if (!serverAvailable) {
+                return {
+                  demo: true,
+                  error: 'MCP_SERVER_UNAVAILABLE',
+                  message: `⚠️ SkyFi MCP server is not running. Please start it with "npm run dev" in the main project directory.`,
+                  note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+                };
+              }
+              
+              const result = await executeSkyFiFunction(skyfiConfig, funcDef.name, args);
+              return result;
+            } catch (error) {
+              // Enhanced error handling
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              if (errorMessage.includes('fetch') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('Failed to fetch')) {
+                return {
+                  demo: true,
+                  error: 'MCP_SERVER_UNAVAILABLE',
+                  message: `⚠️ Cannot connect to SkyFi MCP server. Please ensure it's running on ${skyfiBaseUrl || 'http://localhost:3000/v1'}`,
+                  note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+                };
+              }
+              return {
+                error: errorMessage,
+                details: error instanceof Error ? error.stack : String(error),
+              };
+            }
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create SkyFi tools:', error);
+      // Return empty tools if there's an error
+    }
+  } else if (hasOpenAI) {
+    // If OpenAI is available but SkyFi isn't, create demo tools that explain the situation
+    try {
+      const functionDefinitions = getSkyFiFunctions(skyfiConfig);
+      for (const funcDef of functionDefinitions) {
+        tools[funcDef.name] = tool({
+          description: funcDef.description,
+          parameters: funcDef.parameters,
+          execute: async (args: Record<string, unknown>) => {
             return {
               demo: true,
-              error: 'MCP_SERVER_UNAVAILABLE',
-              message: `⚠️ SkyFi MCP server is not running. Please start it with "npm run dev" in the main project directory.`,
-              note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+              message: `🎭 SkyFi API key not configured yet. This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+              note: 'Add SKYFI_API_KEY to .env.local to enable real SkyFi MCP functionality',
             };
-          }
-          
-          const result = await executeSkyFiFunction(skyfiConfig, funcDef.name, args);
-          return result;
-        } catch (error) {
-          // Enhanced error handling
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          if (errorMessage.includes('fetch') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('Failed to fetch')) {
-            return {
-              demo: true,
-              error: 'MCP_SERVER_UNAVAILABLE',
-              message: `⚠️ Cannot connect to SkyFi MCP server. Please ensure it's running on ${skyfiBaseUrl || 'http://localhost:3000/v1'}`,
-              note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
-            };
-          }
-          return {
-            error: errorMessage,
-            details: error instanceof Error ? error.stack : String(error),
-          };
-        }
-      },
-    });
-    return acc;
-  }, {} as Record<string, ReturnType<typeof tool>>);
-} else if (hasOpenAI) {
-  // If OpenAI is available but SkyFi isn't, create demo tools that explain the situation
-  const functionDefinitions = getSkyFiFunctions(skyfiConfig);
-  tools = functionDefinitions.reduce((acc, funcDef) => {
-    acc[funcDef.name] = tool({
-      description: funcDef.description,
-      parameters: funcDef.parameters,
-      execute: async (args: Record<string, unknown>) => {
-        return {
-          demo: true,
-          message: `🎭 SkyFi API key not configured yet. This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
-          note: 'Add SKYFI_API_KEY to .env.local to enable real SkyFi MCP functionality',
-        };
-      },
-    });
-    return acc;
-  }, {} as Record<string, ReturnType<typeof tool>>);
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Failed to create demo tools:', error);
+    }
+  }
+  
+  return tools;
 }
 
 export async function POST(req: Request) {
@@ -192,6 +194,9 @@ You can still help users understand:
 - How monitoring works
 
 Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
+
+    // Create tools at request time (not module load time)
+    const tools = createSkyFiTools();
 
     const result = await streamText({
       model: openai('gpt-4o-mini'), // Using gpt-4o-mini for better compatibility

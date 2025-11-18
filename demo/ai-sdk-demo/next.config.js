@@ -2,9 +2,7 @@ const path = require('path');
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
+  // Server Actions are enabled by default in Next.js 14+
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
