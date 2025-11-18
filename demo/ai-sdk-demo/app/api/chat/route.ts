@@ -303,9 +303,12 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Use toDataStreamResponse() helper from AI SDK v5
-    return toDataStreamResponse({
-      response: result,
+    // Use createTextStreamResponse() helper from AI SDK v5
+    return createTextStreamResponse({
+      textStream: result.textStream,
+      headers: {
+        'X-Vercel-AI-Data-Stream': 'v1',
+      },
     });
   } catch (error) {
     console.error('Chat API error:', error);
