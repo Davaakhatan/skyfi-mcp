@@ -43,8 +43,9 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 // .partial() makes all fields optional but preserves the object structure
 const skyFiSchemas = {
   searchData: z.object({
-    // At least one field must be present - use query as the primary field
+    // REQUIRED field to ensure schema serializes correctly
     query: z.string().describe('Search query or location string (e.g., "New York, NY" or "satellite data") - will be geocoded if it\'s a location'),
+  }).extend({
     dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
