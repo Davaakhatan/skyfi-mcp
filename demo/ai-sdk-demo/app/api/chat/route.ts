@@ -303,20 +303,31 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Next.js App Router uses Web Response API, not Node.js ServerResponse
-    // Convert textStream to data stream format manually
+    // Use fullStream which contains the complete data stream format
+    // This includes all metadata that @ai-sdk/react v2 needs
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Stream text chunks in data stream format
-          for await (const chunk of result.textStream) {
-            // Format: 0:{"type":"text-delta","textDelta":"chunk"}
-            const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
-            controller.enqueue(encoder.encode(dataLine));
+          // Use fullStream if available (contains complete data stream)
+          // Otherwise fall back to textStream
+          const sourceStream = result.fullStream || result.textStream;
+          
+          for await (const chunk of sourceStream) {
+            // If it's already a string in data stream format, use it directly
+            // Otherwise format it
+            if (typeof chunk === 'string' && chunk.includes('{"type"')) {
+              controller.enqueue(encoder.encode(chunk));
+            } else {
+              // Format: 0:{"type":"text-delta","textDelta":"chunk"}
+              const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
+              controller.enqueue(encoder.encode(dataLine));
+            }
           }
-          // Done marker
-          controller.enqueue(encoder.encode('d:{}\n'));
+          // Done marker (only if not already in stream)
+          if (!result.fullStream) {
+            controller.enqueue(encoder.encode('d:{}\n'));
+          }
           controller.close();
         } catch (error) {
           console.error('Stream error:', error);
