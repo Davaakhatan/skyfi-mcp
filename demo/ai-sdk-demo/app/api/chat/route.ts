@@ -303,20 +303,18 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Use toDataStreamResponse() for proper format
-    // If that doesn't exist, convert AsyncIterableStream to ReadableStream
-    if (typeof result.toDataStreamResponse === 'function') {
-      return result.toDataStreamResponse();
-    }
-    
-    // Fallback: Convert AsyncIterableStream to ReadableStream
+    // Convert textStream to data stream format that @ai-sdk/react expects
+    const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder();
         try {
           for await (const chunk of result.textStream) {
-            controller.enqueue(encoder.encode(chunk));
+            // Format as AI SDK data stream: 0:{"type":"text-delta","textDelta":"..."}
+            const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
+            controller.enqueue(encoder.encode(dataLine));
           }
+          // Send done marker
+          controller.enqueue(encoder.encode('d:{}\n'));
           controller.close();
         } catch (error) {
           controller.error(error);
