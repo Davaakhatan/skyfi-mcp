@@ -2,9 +2,11 @@
 
 ## Schema Serialization Issue with AI SDK v5
 
-**Status**: 🔴 Active Issue  
+**Status**: 🔴 Active Issue - **CONFIRMED BUG**  
 **Priority**: High  
-**Affected**: All SkyFi MCP tools
+**Affected**: All SkyFi MCP tools  
+**AI SDK Version**: v5.0.93  
+**Zod Version**: v3.25.76
 
 ### Problem
 
@@ -14,9 +16,22 @@ When attempting to use SkyFi MCP tools with AI SDK v5, we encounter the followin
 Invalid schema for function 'skyfi_search_data': schema must be a JSON Schema of 'type: "object"', got 'type: "None"'.
 ```
 
+This error occurs **even when**:
+- Using Zod schemas with required fields
+- Using JSON schemas directly
+- Using `.partial()` instead of `.optional()`
+- Ensuring at least one required field exists
+- Manually converting Zod to JSON schema
+
 ### Root Cause
 
-AI SDK v5's `tool()` function has a limitation when serializing Zod schemas where all fields are optional. The schema gets serialized as `type: "None"` instead of `type: "object"`, causing the tool creation to fail.
+**CONFIRMED**: This is a bug in AI SDK v5's internal schema serialization. The `tool()` function is incorrectly serializing Zod schemas (or JSON schemas) as `type: "None"` instead of `type: "object"`, regardless of the schema structure.
+
+**Evidence**:
+- Error persists with all schema variations
+- Error occurs even with simple schemas that have required fields
+- Error occurs with both Zod and JSON schemas
+- Server-side logging shows correct schema structure before passing to `tool()`
 
 ### Attempted Solutions
 
