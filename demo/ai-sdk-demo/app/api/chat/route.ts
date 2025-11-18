@@ -304,8 +304,9 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
 
     // @ai-sdk/react v2 with ai v5.x
     // Use pipeTextStreamToResponse for proper formatting
+    // It expects textStream, not response
     return pipeTextStreamToResponse({
-      response: result,
+      textStream: result.textStream,
       headers: {
         'X-Vercel-AI-Data-Stream': 'v1',
       },
