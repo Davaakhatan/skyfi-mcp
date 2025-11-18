@@ -303,29 +303,19 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Use fullStream which contains the complete data stream format
-    // This includes all metadata that @ai-sdk/react v2 needs
+    // Return textStream directly - AI SDK v5 handles the formatting
+    // Convert AsyncIterableStream to ReadableStream
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          // Use fullStream if available (contains complete data stream)
-          // Otherwise fall back to textStream
-          const sourceStream = result.fullStream || result.textStream;
-          
-          for await (const chunk of sourceStream) {
-            // fullStream chunks are objects, textStream chunks are strings
-            if (typeof chunk === 'string') {
-              // textStream: format as data stream
-              const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
-              controller.enqueue(encoder.encode(dataLine));
-            } else {
-              // fullStream: already in data stream format, just stringify
-              const dataLine = `0:${JSON.stringify(chunk)}\n`;
-              controller.enqueue(encoder.encode(dataLine));
-            }
+          // Use textStream directly - it's already formatted correctly
+          for await (const chunk of result.textStream) {
+            // textStream yields plain strings, format as data stream
+            const dataLine = `0:{"type":"text-delta","textDelta":${JSON.stringify(chunk)}}\n`;
+            controller.enqueue(encoder.encode(dataLine));
           }
-          // Always send done marker - required by @ai-sdk/react v2
+          // Done marker
           controller.enqueue(encoder.encode('d:{}\n'));
           controller.close();
         } catch (error) {

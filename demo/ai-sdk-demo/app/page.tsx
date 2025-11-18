@@ -6,26 +6,11 @@ import React from 'react';
 
 export default function Chat() {
   const [input, setInput] = useState('');
-  const { messages, sendMessage, status, error, append, setMessages } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     api: '/api/chat',
+    streamProtocol: 'data',
     onError: (error) => {
       console.error('Chat error:', error);
-    },
-    onResponse: (response) => {
-      console.log('Response received:', response);
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-    },
-    onFinish: (message) => {
-      console.log('Message finished:', message);
-      // Workaround: If assistant message isn't in messages, manually add it
-      if (message && message.role === 'assistant') {
-        const exists = messages.find(m => m.id === message.id);
-        if (!exists) {
-          console.log('Manually adding assistant message to state');
-          setMessages(prev => [...prev, message]);
-        }
-      }
     },
   });
   
