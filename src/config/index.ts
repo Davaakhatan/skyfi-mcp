@@ -12,9 +12,13 @@ export const config = {
   apiVersion: process.env.API_VERSION || 'v1',
 
   // SkyFi API Configuration
+  // Support multiple formats: SKYFI_API_KEY, SKYFI_DEMO_API_KEY, skyfi_demo_api_key (SkyFi's format)
   skyfi: {
     apiUrl: process.env.SKYFI_API_URL || 'https://api.skyfi.com',
-    apiKey: process.env.SKYFI_API_KEY || '',
+    apiKey: process.env.SKYFI_API_KEY || 
+            process.env.SKYFI_DEMO_API_KEY || 
+            process.env.skyfi_demo_api_key || 
+            '',
   },
 
   // Database Configuration
