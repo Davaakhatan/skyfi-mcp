@@ -43,6 +43,7 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 // This avoids complex GeoJSON serialization issues with AI SDK v5
 const skyFiSchemas = {
   searchData: z.object({
+    query: z.string().optional().describe('Search query or location string (e.g., "New York, NY" or "satellite data") - will be geocoded if it\'s a location'),
     dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates automatically'),
     timeRange: z.object({
