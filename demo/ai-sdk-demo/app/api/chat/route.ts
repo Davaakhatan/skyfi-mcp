@@ -269,7 +269,8 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    return result.toDataStreamResponse();
+    // AI SDK v3 uses toAIStreamResponse() method
+    return result.toAIStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
