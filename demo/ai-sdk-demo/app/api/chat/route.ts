@@ -115,9 +115,17 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined
         // Use the JSON schema directly from functionDefinitions instead of Zod
         // This avoids serialization issues
         try {
+          // Ensure the schema has type: "object" and at least empty properties
+          const schema = {
+            ...funcDef.parameters,
+            type: 'object' as const,
+            properties: funcDef.parameters.properties || {},
+            required: funcDef.parameters.required || [],
+          };
+          
           tools[funcDef.name] = tool({
             description: funcDef.description,
-            parameters: funcDef.parameters as any, // Use JSON schema directly
+            parameters: schema,
           execute: async (args: Record<string, unknown>) => {
             try {
               // Check server availability before making request
