@@ -18,10 +18,33 @@ const skyfiConfig = {
   baseUrl: skyfiBaseUrl,
 };
 
+// Helper function to check if MCP server is available
+async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
+  try {
+    const url = baseUrl ? `${baseUrl.replace(/\/v1$/, '')}/health` : 'http://localhost:3000/health';
+    const response = await fetch(url, { 
+      method: 'GET',
+      signal: AbortSignal.timeout(2000), // 2 second timeout
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 // Get SkyFi functions and convert to AI SDK tools
 let tools: Record<string, ReturnType<typeof tool>> = {};
+let mcpServerAvailable = false;
 
+// Check MCP server availability if SkyFi key is configured
 if (hasSkyFi) {
+  // Check server health asynchronously (don't block)
+  checkMCPServerHealth(skyfiBaseUrl).then(available => {
+    mcpServerAvailable = available;
+  }).catch(() => {
+    mcpServerAvailable = false;
+  });
+  
   const functionDefinitions = getSkyFiFunctions(skyfiConfig);
   tools = functionDefinitions.reduce((acc, funcDef) => {
     acc[funcDef.name] = tool({
@@ -29,11 +52,33 @@ if (hasSkyFi) {
       parameters: funcDef.parameters,
       execute: async (args: Record<string, unknown>) => {
         try {
+          // Check server availability before making request
+          const serverAvailable = await checkMCPServerHealth(skyfiBaseUrl);
+          if (!serverAvailable) {
+            return {
+              demo: true,
+              error: 'MCP_SERVER_UNAVAILABLE',
+              message: `⚠️ SkyFi MCP server is not running. Please start it with "npm run dev" in the main project directory.`,
+              note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+            };
+          }
+          
           const result = await executeSkyFiFunction(skyfiConfig, funcDef.name, args);
           return result;
         } catch (error) {
+          // Enhanced error handling
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          if (errorMessage.includes('fetch') || errorMessage.includes('ECONNREFUSED') || errorMessage.includes('Failed to fetch')) {
+            return {
+              demo: true,
+              error: 'MCP_SERVER_UNAVAILABLE',
+              message: `⚠️ Cannot connect to SkyFi MCP server. Please ensure it's running on ${skyfiBaseUrl || 'http://localhost:3000/v1'}`,
+              note: `This would execute "${funcDef.name}" with: ${JSON.stringify(args, null, 2)}`,
+            };
+          }
           return {
-            error: error instanceof Error ? error.message : 'Unknown error',
+            error: errorMessage,
+            details: error instanceof Error ? error.stack : String(error),
           };
         }
       },
