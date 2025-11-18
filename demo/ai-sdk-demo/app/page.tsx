@@ -3,8 +3,11 @@
 import { useChat } from 'ai/react';
 
 export default function Chat() {
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
     api: '/api/chat',
+    onError: (error) => {
+      console.error('Chat error:', error);
+    },
   });
 
   return (
