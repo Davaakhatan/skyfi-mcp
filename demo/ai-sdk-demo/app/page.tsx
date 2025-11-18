@@ -10,6 +10,12 @@ export default function Chat() {
     onError: (error) => {
       console.error('Chat error:', error);
     },
+    onResponse: (response) => {
+      console.log('Response received:', response);
+    },
+    onFinish: (message) => {
+      console.log('Message finished:', message);
+    },
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
