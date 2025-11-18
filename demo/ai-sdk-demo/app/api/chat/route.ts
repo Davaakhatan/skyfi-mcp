@@ -116,17 +116,31 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined
       for (const funcDef of functionDefinitions) {
         try {
           // Use JSON schema directly from functionDefinitions
-          // Ensure it has the correct structure
+          // Ensure it has the correct structure with at least one property
+          const baseSchema = funcDef.parameters;
+          
+          // Ensure properties exist and is not empty
+          if (!baseSchema.properties || Object.keys(baseSchema.properties).length === 0) {
+            console.warn(`Schema for ${funcDef.name} has no properties, skipping`);
+            continue;
+          }
+          
+          // Ensure required array exists
+          const required = baseSchema.required || [];
+          
+          // For searchData, ensure query is required
+          if (funcDef.name === 'skyfi_search_data' && baseSchema.properties.query && !required.includes('query')) {
+            required.push('query');
+          }
+          
           const jsonSchema = {
             type: 'object' as const,
-            properties: funcDef.parameters.properties || {},
-            required: funcDef.parameters.required || [],
+            properties: baseSchema.properties,
+            ...(required.length > 0 && { required }),
           };
           
-          // For searchData, ensure query is in required if it exists in properties
-          if (funcDef.name === 'skyfi_search_data' && jsonSchema.properties.query && !jsonSchema.required.includes('query')) {
-            jsonSchema.required.push('query');
-          }
+          // Debug: Log the schema structure
+          console.log(`Creating tool ${funcDef.name} with schema:`, JSON.stringify(jsonSchema, null, 2));
           
           tools[funcDef.name] = tool({
             description: funcDef.description,
