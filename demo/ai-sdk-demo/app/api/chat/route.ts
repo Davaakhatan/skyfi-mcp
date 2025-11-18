@@ -116,36 +116,16 @@ function createSkyFiTools(): Record<string, ReturnType<typeof tool>> | undefined
       const functionDefinitions = getSkyFiFunctions(skyfiConfig);
       for (const funcDef of functionDefinitions) {
         try {
-          // Use JSON schema directly from functionDefinitions
-          // Ensure it has the correct structure with at least one property
-          const baseSchema = funcDef.parameters;
-          
-          // Ensure properties exist and is not empty
-          if (!baseSchema.properties || Object.keys(baseSchema.properties).length === 0) {
-            console.warn(`Schema for ${funcDef.name} has no properties, skipping`);
+          // Use Zod schema from schemaMap - .extend() approach fixed the serialization!
+          const zodSchema = schemaMap[funcDef.name];
+          if (!zodSchema) {
+            console.warn(`No Zod schema found for ${funcDef.name}, skipping`);
             continue;
           }
           
-          // Ensure required array exists
-          const required = baseSchema.required || [];
-          
-          // For searchData, ensure query is required
-          if (funcDef.name === 'skyfi_search_data' && baseSchema.properties.query && !required.includes('query')) {
-            required.push('query');
-          }
-          
-          const jsonSchema = {
-            type: 'object' as const,
-            properties: baseSchema.properties,
-            ...(required.length > 0 && { required }),
-          };
-          
-          // Debug: Log the schema structure
-          console.log(`Creating tool ${funcDef.name} with schema:`, JSON.stringify(jsonSchema, null, 2));
-          
           tools[funcDef.name] = tool({
             description: funcDef.description,
-            parameters: jsonSchema,
+            parameters: zodSchema,
           execute: async (args: Record<string, unknown>) => {
             try {
               // Check server availability before making request
