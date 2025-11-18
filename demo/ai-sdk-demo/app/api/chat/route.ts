@@ -39,12 +39,12 @@ async function checkMCPServerHealth(baseUrl?: string): Promise<boolean> {
 }
 
 // Direct Zod schema definitions for SkyFi functions
-// Simplified schemas to ensure proper serialization for AI SDK v5
+// Using z.record() for complex objects to avoid serialization issues
 const skyFiSchemas = {
   searchData: z.object({
     dataType: z.string().optional().describe('Type of data to search for (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -55,7 +55,7 @@ const skyFiSchemas = {
   createOrder: z.object({
     dataType: z.string().describe('Type of data to order (e.g., "satellite", "aerial")'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -71,7 +71,7 @@ const skyFiSchemas = {
   estimatePrice: z.object({
     dataType: z.string().describe('Type of data to estimate price for'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -82,7 +82,7 @@ const skyFiSchemas = {
   checkFeasibility: z.object({
     dataType: z.string().describe('Type of data to check feasibility for'),
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
+    areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
     timeRange: z.object({
       start: z.string().describe('Start date in ISO format'),
       end: z.string().describe('End date in ISO format'),
@@ -91,8 +91,8 @@ const skyFiSchemas = {
   
   setupMonitoring: z.object({
     location: z.string().optional().describe('Location string (e.g., "New York, NY") - will be geocoded to coordinates'),
-    areaOfInterest: z.any().optional().describe('GeoJSON area of interest as object'),
-    aoiData: z.any().optional().describe('GeoJSON area of interest as object (alternative name)'),
+    areaOfInterest: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object'),
+    aoiData: z.record(z.unknown()).optional().describe('GeoJSON area of interest as object (alternative name)'),
     frequency: z.enum(['hourly', 'daily', 'weekly']).optional().describe('Monitoring frequency'),
     webhookUrl: z.string().url().optional().describe('Webhook URL for notifications'),
     dataTypes: z.array(z.string()).optional().describe('Types of data to monitor'),
@@ -289,10 +289,8 @@ You can still help users understand:
 
 Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able to perform real operations.`;
 
-    // TEMPORARILY DISABLED: Tools have schema serialization issues
-    // TODO: Fix Zod schema serialization for AI SDK v5
-    // For now, disable tools so basic chat works
-    const tools = undefined; // createSkyFiTools();
+    // Re-enable SkyFi tools with fixed schemas
+    const tools = createSkyFiTools();
 
     const result = await streamText({
       model: openai('gpt-4o-mini'), // Using gpt-4o-mini for better compatibility
