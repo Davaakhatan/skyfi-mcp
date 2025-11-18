@@ -1,5 +1,5 @@
 import { openai } from '@ai-sdk/openai';
-import { streamText, tool } from 'ai';
+import { streamText, tool, toDataStreamResponse } from 'ai';
 import { z } from 'zod';
 import { getSkyFiFunctions, executeSkyFiFunction } from '../../../../../src/integrations/ai-sdk/index';
 
@@ -277,58 +277,9 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
       system: systemMessage,
     });
 
-    // AI SDK v3.2.17 - StreamTextResult doesn't have toAIStreamResponse() in this version
-    // Use the baseStream property to create a response compatible with useChat
-    const resultAny = result as any;
-    
-    // Check for response methods first
-    if (typeof resultAny.toAIStreamResponse === 'function') {
-      return resultAny.toAIStreamResponse();
-    } else if (typeof resultAny.toDataStreamResponse === 'function') {
-      return resultAny.toDataStreamResponse();
-    } else if (resultAny.baseStream) {
-      // Transform baseStream to AI SDK data stream format for useChat
-      const encoder = new TextEncoder();
-      const transformedStream = new ReadableStream({
-        async start(controller) {
-          try {
-            const reader = resultAny.baseStream.getReader();
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              
-              // Transform the chunk to AI SDK data stream format
-              if (value && typeof value === 'object') {
-                // Handle different chunk types
-                if (value.type === 'text-delta' && value.textDelta) {
-                  const line = `0:${JSON.stringify({ type: 'text-delta', textDelta: value.textDelta })}\n`;
-                  controller.enqueue(encoder.encode(line));
-                } else if (value.type === 'tool-call' || value.type === 'tool-result') {
-                  // Handle tool calls/results
-                  const line = `0:${JSON.stringify(value)}\n`;
-                  controller.enqueue(encoder.encode(line));
-                }
-              } else if (typeof value === 'string') {
-                controller.enqueue(encoder.encode(value));
-              }
-            }
-            controller.enqueue(encoder.encode('d:{}\n'));
-            controller.close();
-          } catch (error) {
-            controller.error(error);
-          }
-        },
-      });
-      
-      return new Response(transformedStream, {
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'X-Vercel-AI-Data-Stream': 'v1',
-        },
-      });
-    } else {
-      throw new Error('No stream found on StreamTextResult');
-    }
+    // @ai-sdk/react v2 expects a specific response format
+    // Use streamToResponse helper from ai v3.2.17 to create the correct format
+    return streamToResponse(result);
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
