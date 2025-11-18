@@ -287,8 +287,40 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     } else if (typeof resultAny.toDataStreamResponse === 'function') {
       return resultAny.toDataStreamResponse();
     } else if (resultAny.baseStream) {
-      // Use baseStream to create response in AI SDK data stream format
-      return new Response(resultAny.baseStream, {
+      // Transform baseStream to AI SDK data stream format for useChat
+      const encoder = new TextEncoder();
+      const transformedStream = new ReadableStream({
+        async start(controller) {
+          try {
+            const reader = resultAny.baseStream.getReader();
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              
+              // Transform the chunk to AI SDK data stream format
+              if (value && typeof value === 'object') {
+                // Handle different chunk types
+                if (value.type === 'text-delta' && value.textDelta) {
+                  const line = `0:${JSON.stringify({ type: 'text-delta', textDelta: value.textDelta })}\n`;
+                  controller.enqueue(encoder.encode(line));
+                } else if (value.type === 'tool-call' || value.type === 'tool-result') {
+                  // Handle tool calls/results
+                  const line = `0:${JSON.stringify(value)}\n`;
+                  controller.enqueue(encoder.encode(line));
+                }
+              } else if (typeof value === 'string') {
+                controller.enqueue(encoder.encode(value));
+              }
+            }
+            controller.enqueue(encoder.encode('d:{}\n'));
+            controller.close();
+          } catch (error) {
+            controller.error(error);
+          }
+        },
+      });
+      
+      return new Response(transformedStream, {
         headers: {
           'Content-Type': 'text/plain; charset=utf-8',
           'X-Vercel-AI-Data-Stream': 'v1',
