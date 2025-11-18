@@ -303,9 +303,8 @@ Be helpful and explain that once the SKYFI_API_KEY is configured, you'll be able
     });
 
     // @ai-sdk/react v2 with ai v5.x
-    // Try returning the stream directly from result
-    // AI SDK v5 should handle the formatting automatically
-    return result.toDataStreamResponse();
+    // Use toUIMessageStreamResponse() - this is the correct method for @ai-sdk/react v2
+    return result.toUIMessageStreamResponse();
   } catch (error) {
     console.error('Chat API error:', error);
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
